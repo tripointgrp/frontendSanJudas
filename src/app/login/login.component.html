@@ -1,0 +1,32 @@
+<section class="vh-100">
+  <div class="container py-5 h-100">
+    <div class="row d-flex align-items-center justify-content-center h-100">
+      <div class="col-md-8 col-lg-7 col-xl-6">
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+          class="img-fluid" alt="Phone image">
+      </div>
+      <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+        <form (ngSubmit)="onSubmit()">
+          <h1>Bienvenido!</h1>
+          <!-- Email input -->
+          <div data-mdb-input-init class="form-outline mb-4">
+            <input type="email" id="form1Example13" class="form-control form-control-lg" style="border: 1px solid #ccc;" [(ngModel)]="email" name="email" required />
+            <label class="form-label" for="form1Example13">Correo electrónico</label>
+          </div>
+
+          <!-- Password input -->
+          <div data-mdb-input-init class="form-outline mb-4 position-relative">
+            <input [type]="passwordVisible ? 'text' : 'password'" id="form1Example23" class="form-control form-control-lg" style="border: 1px solid #ccc;" [(ngModel)]="password" name="password" required />
+            <label class="form-label" for="form1Example23">Contraseña</label>
+            <i class="{{ passwordVisible ? 'far fa-eye-slash' : 'far fa-eye' }} position-absolute"
+               style="top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"
+               (click)="togglePasswordVisibility()"></i>
+          </div>
+
+          <!-- Submit button -->
+          <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block w-100">Iniciar sesión</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

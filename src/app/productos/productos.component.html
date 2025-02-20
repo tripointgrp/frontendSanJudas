@@ -1,0 +1,30 @@
+<div class="productos-container">
+    <h1>Productos</h1>
+    <button class="btn-agregar">Agregar Ingrediente</button>
+  
+    <ngx-datatable
+      [rows]="rows"
+      [columns]="[
+        { prop: 'nombre', name: 'Nombre del Producto', flexGrow: 2 },
+        { prop: 'descripcion', name: 'Descripción', flexGrow: 3 },
+        { prop: 'precio', name: 'Precio', flexGrow: 1 },
+        { prop: 'marca', name: 'Marca', flexGrow: 1 },
+        { prop: 'categoria', name: 'Categoría', flexGrow: 1 },
+        { prop: 'unidad', name: 'U. Medida', flexGrow: 1 },
+        { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+      ]"
+      class="bootstrap"
+      columnMode="flex"
+      [headerHeight]="60"
+      [footerHeight]="50"
+      [rowHeight]="50"
+      [scrollbarV]="true"
+    >
+    </ngx-datatable>
+  
+    <ng-template #actionTpl let-row="row">
+      <button class="btn-accion editar" (click)="editarProducto(row)">Editar</button>
+      <button class="btn-accion eliminar" (click)="eliminarProducto(row)">Eliminar</button>
+    </ng-template>
+  </div>
+  

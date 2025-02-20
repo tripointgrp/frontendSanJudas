@@ -1,0 +1,21 @@
+.sidebar-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 85px; // Asegúrate de definir el ancho inicial
+  transition: width 0.3s ease; // Añade una transición suave para el ancho
+}
+
+.sidebar-area:hover {
+  width: 250px;
+}
+
+.sidebar-area:hover ~ .content-area {
+  margin-left: 250px;
+}
+
+.content-area {
+  margin-left: 85px;
+  transition: margin-left 0.3s ease; // Añade una transición suave para el margen
+}
