@@ -1,13 +1,16 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../services/api.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [FormsModule]
+  imports: [FormsModule],
+  providers: [ApiService]
 })
 export class LoginComponent {
   email: string = '';
@@ -19,7 +22,13 @@ export class LoginComponent {
     { email: 'user2@example.com', password: 'password2' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private service: ApiService) {
+    this.service.getData().subscribe((data:any) => {
+      this.users = data;
+      console.log(this.users);
+    });
+
+  }
 
   onSubmit() {
     const user = this.users.find(u => u.email === this.email && u.password === this.password);
