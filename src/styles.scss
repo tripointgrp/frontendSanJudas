@@ -3,3 +3,33 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+:root {
+    --color-light: #e3e3e3;
+    --color-light-hover: #d2d2d2;
+    --color-light-active: #dedede;
+  
+    --color-normal: #1e25ca;
+    --color-normal-hover: #cccdf3;
+    --color-normal-active: #dcddf7;
+  
+    --color-dark: #1e24b7;
+    --color-dark-hover: #1f249c;
+    --color-dark-active: #1d2280;
+  
+    --color-darker: #909090;
+    --color-darker-hover: #a1a1a1;
+    --color-darker-active: #777777;
+  
+    --color-accent: #171ec9;
+    --color-accent-hover: #494fd5;
+    --color-accent-active: #1c22a4;
+  
+    --color-secondary: #1e23a5;
+    --color-secondary-hover: #1117a0;
+    --color-secondary-active: #3b40b1;
+  
+    --color-muted: #b4b4b4;
+    --color-muted-hover: #989898;
+  }
