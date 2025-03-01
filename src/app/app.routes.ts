@@ -11,12 +11,14 @@ import { EditarEscuelasComponent } from './escuelas/editar-escuelas/editar-escue
 import { LoginGuard } from './guards/login.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { MantenimientosComponent } from './mantenimientos/mantenimientos.component';
+import { UsuariosComponent } from './usuarios/usuarios.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
   { path: '', component: LayoutComponent, canActivate: [AuthGuard], children: [
       { path: 'home', component: HomeComponent },
+      { path: 'usuarios', component: UsuariosComponent },
       { path: 'escuelas', component: EscuelasComponent },
       { path: 'editar-escuelas', component: EditarEscuelasComponent },
       { path: 'productos', component: ProductosComponent },

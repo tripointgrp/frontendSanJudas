@@ -44,6 +44,9 @@ export class SidebarComponent {
         case 'mantenimientos':
           this.router.navigate(['/mantenimientos']);
           break;
+        case 'usuarios':
+          this.router.navigate(['/usuarios']);
+          break;
         default:
           this.router.navigate(['/home']);
           break;
