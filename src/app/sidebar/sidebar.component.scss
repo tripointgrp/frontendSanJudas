@@ -116,4 +116,16 @@ ul {
   background: #d73131;
   border-radius: 4px;
 }
+/* 🔹 Imagen con animación de tamaño */
+.sidebar .sidebar-header img {
+  width: 50px; /* Tamaño normal */
+  height: auto;
+  object-fit: contain; /* Asegura que la imagen no se recorte */
+  transition: all 0.4s ease;
+  border-radius: 0%;
+}
 
+/* 🔹 Cuando el sidebar se expande, la imagen aumenta de tamaño */
+.sidebar:hover .sidebar-header img {
+  width: 200px; /* Aumenta más el tamaño en hover */
+}
