@@ -24,16 +24,20 @@ export class LoginComponent {
 
   constructor(private router: Router, private service: ApiService) {
     this.service.getData().subscribe((data:any) => {
-      this.users = data;
+      // this.users = data;
       console.log(this.users);
     });
 
   }
 
   onSubmit() {
+    console.log('Email:', this.email);
+    console.log('Password', this.password);
     const user = this.users.find(u => u.email === this.email && u.password === this.password);
+    console.log(user);
     if (user) {
       const token = btoa(`${this.email}:${this.password}`); // Genera un token básico (Base64)
+      console.log(token)
       localStorage.setItem('token', token); // Guarda el token en localStorage
       this.router.navigate(['/home']);
     } else {
