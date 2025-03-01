@@ -1,5 +1,131 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap');
+// @import 'ngx-toastr/toastr';
+// @import 'ngx-toastr/toastr-bs4-alert'; /* Para Bootstrap 4 */
+// @import 'ngx-toastr/toastr-bs5-alert'; /* Para Bootstrap 5 */
+
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.toast-container {
+  border-radius: 22px !important;
+  // box-shadow: -5px 8px 16px 0px rgba(0,0,0,0.3) !important;
+  margin-bottom: 2px !important;
+}
+
+.toast-container .toast {
+  margin: 2px !important;
+  box-shadow: none !important;
+  border-radius: 20px !important;
+  // background-color: #fff !important;
+}
+.toast-success {
+  background-image: none !important;
+  border-radius: 10px;
+  background: #9EFF80;
+}
+
+/* ✅ Mensaje de éxito (texto negro) */
+.toast-success .toast-message {
+  color: #000 !important;
+}
+
+.toast-success .toast-title {
+  color: #000 !important;
+}
+
+.toast-error {
+  background-image: none !important;
+  background-color: #f32237 !important;
+  color: #ffffff !important;
+}
+
+/* ✅ Mensaje de error (texto blanco) */
+.toast-error .toast-message {
+  color: #fff !important;
+}
+
+.toast-success::after {
+  content: 'check' !important;
+  font-family: 'Material Symbols Outlined' !important;
+  position: absolute !important;
+  top: 26px !important;
+  left: 15px !important;
+  color: black !important;
+  font-size: 1.2em !important;
+}
+
+.toast-error::after {
+  content: 'close' !important;
+  font-family: 'Material Symbols Outlined' !important;
+  position: absolute !important;
+  top: 26px !important;
+  left: 15px !important;
+  color: white !important;
+  font-size: 1.2em !important;
+}
+
+.toast-title {
+  color: white !important;
+  font-size: 14px !important;
+}
+
+/* ✅ Mensaje por defecto en blanco */
+.toast-message {
+  font-size: 12px;
+  color: #fefefe !important;
+}
+
+
+.toast-container .ngx-toastr{
+  border-radius: 10px !important;
+}
+
+.submit-button {
+  background-color: #1D24CA;
+  color: #ffffff !important;
+  border: none;
+  font-size: 12px;
+  padding: 5px 20px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: flex;
+  margin-left: auto;
+  &:hover {
+    background-color: #8F93EE;
+  }
+}
+
+
+:root {
+    --color-light: #e3e3e3;
+    --color-light-hover: #d2d2d2;
+    --color-light-active: #dedede;
+
+    --color-normal: #1e25ca;
+    --color-normal-hover: #cccdf3;
+    --color-normal-active: #dcddf7;
+
+    --color-dark: #1e24b7;
+    --color-dark-hover: #1f249c;
+    --color-dark-active: #1d2280;
+
+    --color-darker: #909090;
+    --color-darker-hover: #a1a1a1;
+    --color-darker-active: #777777;
+
+    --color-accent: #171ec9;
+    --color-accent-hover: #494fd5;
+    --color-accent-active: #1c22a4;
+
+    --color-secondary: #1e23a5;
+    --color-secondary-hover: #1117a0;
+    --color-secondary-active: #3b40b1;
+
+    --color-muted: #b4b4b4;
+    --color-muted-hover: #989898;
+  }

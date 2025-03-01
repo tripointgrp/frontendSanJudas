@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>{{ data.title || 'Formulario Dinámico' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <!-- Contenedor de los inputs con grid dinámico -->
+    <div class="grid-container" [ngStyle]="{'grid-template-columns': 'repeat(' + (data.columns || 1) + ', 1fr)'}">
+      <div class="input-container" *ngFor="let field of data.fields">
+        <label class="input-label">{{ field.label }}</label>
+        <input
+          class="custom-input"
+          [class.input-error]="form.controls[field.name].invalid && form.controls[field.name].touched"
+          [type]="field.type"
+          [formControlName]="field.name"
+          [placeholder]="field.placeholder"
+        />
+        <!-- Mensajes de error -->
+        <div class="error-message" *ngIf="form.controls[field.name].invalid && form.controls[field.name].touched">
+          <span *ngIf="form.controls[field.name].errors?.['required']">⚠ Este campo es obligatorio</span>
+          <span *ngIf="form.controls[field.name].errors?.['email']">⚠ Ingrese un correo válido</span>
+          <span *ngIf="form.controls[field.name].errors?.['minlength']">
+            ⚠ Debe tener al menos {{ field.minLength }} caracteres
+          </span>
+          <span *ngIf="form.controls[field.name].errors?.['maxlength']">
+            ⚠ No debe exceder {{ field.maxLength }} caracteres
+          </span>
+          <span *ngIf="form.controls[field.name].errors?.['pattern']">
+            ⚠ Formato inválido
+          </span>
+          <span *ngIf="form.controls[field.name].errors?.['min']">
+            ⚠ Debe ser mayor o igual a {{ field.min }}
+          </span>
+          <span *ngIf="form.controls[field.name].errors?.['max']">
+            ⚠ Debe ser menor o igual a {{ field.max }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button class="cancel-button" *ngIf="data.showCancelButton" (click)="cerrarModal()">
+    {{ data.cancelButtonText || 'Cancelar' }}
+  </button>
+
+  <button mat-button class="submit-button" color="primary" *ngIf="data.showActionButton" (click)="enviarFormulario()">
+    {{ data.actionButtonText || 'Enviar' }}
+  </button>
+</mat-dialog-actions>
