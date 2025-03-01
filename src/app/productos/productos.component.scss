@@ -1,106 +1,139 @@
 .productos-container {
-    padding: 20px;
-    background-color: #FDF5E6;
-    border-radius: 10px;
-    min-height: 100vh;
-    color: #1D4D5D;
-    text-align: center;
-  
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-    }
-  
-    .btn-agregar {
-      background-color: #D9A54A;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-  
-      &:hover {
-        background-color: #b9832f;
-      }
-    }
-  
-    ngx-datatable {
-        width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      
-        ::ng-deep .datatable-header {
-          background-color: #AFCFC8; // Verde claro
-          color: #1D4D5D; // Azul oscuro
-          font-size: 1.1rem;
-          font-weight: bold;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-          border-bottom: 2px solid #D9A54A; // Línea dorada
-        }
+  padding: 20px;
+  border-radius: 20px;
+  min-height: 100vh;
+  color: #333333;
+  text-align: center;
 
-        ::ng-deep .datatable-header-cell {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          padding: 12px 0;
-        }
-      
-        .datatable-body {
-          background-color: #FDF5E6;
-          color: #1D4D5D;
-      
-          .datatable-row-even {
-            background-color: #AFCFC8;
-          }
-      
-          .datatable-row-odd {
-            background-color: #FDF5E6;
-          }
-      
-          .datatable-body-cell {
-            padding: 15px;
-            font-size: 1rem;
-            text-align: center;
-          }
-        }
-      
-        .datatable-footer {
-          background-color: #D9A54A;
-          color: #1D4D5D;
-          font-weight: bold;
-          font-size: 1rem;
-          text-align: center;
-        }
-      }
-      
-  
-    .btn-accion {
-      padding: 8px 12px;
-      margin: 0 5px;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s ease;
-  
-      &.editar {
-        background-color: #AFCFC8;
-        &:hover {
-          background-color: #89b0a6;
-        }
-      }
-  
-      &.eliminar {
-        background-color: #D9A54A;
-        &:hover {
-          background-color: #b9832f;
-        }
-      }
-    }
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: #1A20B6;
+    text-align: center;
+    font-family: "Raleway", serif;
   }
+
+  .responsive-table {
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+  }
+
+  ngx-datatable {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      overflow-x: auto;
+  }
+
+  ::ng-deep .datatable-body {
+      font-size: 0.8rem;
+      text-align: left;
+  }
+
+  ::ng-deep .datatable-header {
+      background-color: #1D24CA;
+      color: #F5F5F5;
+      font-size: 0.8rem;
+      // text-transform: uppercase;
+      font-family: "Raleway", serif;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #D9A54A;
+      padding: 5px !important;
+  }
+
+  ::ng-deep .datatable-header-cell, ::ng-deep .datatable-body-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      white-space: nowrap;
+  }
+
+  .datatable-body {
+      background-color: #FDF5E6;
+      color: #1D24CA;
+  }
+
+  .datatable-row-even {
+      background-color: #1D24CA;
+  }
+
+  .datatable-row-odd {
+      background-color: #FDF5E6;
+  }
+
+  .datatable-footer {
+      background-color: #D9A54A;
+      color: #1D24CA;
+      font-weight: bold;
+      font-size: 1rem;
+      text-align: center;
+  }
+
+  .span-edit, .span-delete {
+      cursor: pointer;
+      padding: 8px;
+      &:hover {
+          opacity: 0.8;
+      }
+  }
+  .span-edit {
+      color: #1D24CA;
+  }
+  .span-delete {
+      color: #F32237;
+  }
+
+  .buscador-agregar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.buscador {
+    position: relative;
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+.buscador-input {
+    width: 100%;
+    padding: 6px;
+    border-radius: 8px;
+    border: 0px;
+    background-color: #dddddd;
+    font-size: 12px;
+    margin-right: 10px;
+}
+
+.buscador-input::placeholder {
+    font-size: 12px;
+}
+
+.buscador-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 20px;
+    pointer-events: none; /* Evita que el icono interfiera con el input */
+}
+
+
+  @media screen and (max-width: 768px) {
+      .responsive-table {
+          overflow-x: scroll;
+          display: block;
+          white-space: nowrap;
+      }
+
+      .datatable-header-cell, .datatable-body-cell {
+          font-size: 0.7rem;
+          padding: 8px;
+      }
+  }
+}

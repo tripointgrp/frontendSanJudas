@@ -1,30 +1,45 @@
 <div class="productos-container">
-    <h1>Productos</h1>
-    <button class="btn-agregar">Agregar Ingrediente</button>
-  
+    <h1>PRODUCTOS</h1>
+    <div class="buscador-agregar-container">
+      <div class="buscador">
+          <input type="text" placeholder="   Buscar producto..." [(ngModel)]="searchTerm" (input)="filterProducts()" class="buscador-input" />
+          <span class="material-symbols-outlined buscador-icon">search</span>
+      </div>
+      <button class="submit-button" (click)="abrirModal()">
+          <!-- <span class="material-symbols-outlined">add</span> -->
+          Agregar producto
+      </button>
+  </div>
+
+
     <ngx-datatable
       [rows]="rows"
       [columns]="[
-        { prop: 'nombre', name: 'Nombre del Producto', flexGrow: 2 },
-        { prop: 'descripcion', name: 'Descripción', flexGrow: 3 },
-        { prop: 'precio', name: 'Precio', flexGrow: 1 },
-        { prop: 'marca', name: 'Marca', flexGrow: 1 },
-        { prop: 'categoria', name: 'Categoría', flexGrow: 1 },
-        { prop: 'unidad', name: 'U. Medida', flexGrow: 1 },
-        { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+      { prop: 'nombre', name: 'Nombre del Producto', flexGrow: 4},
+      { prop: 'precio', name: 'Precio', flexGrow: 1 },
+      { prop: 'marca', name: 'Marca', flexGrow: 1 },
+      { prop: 'categoria', name: 'Categoría', flexGrow: 1 },
+      { prop: 'unidad', name: 'U. Medida', flexGrow: 1 },
+      { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
       ]"
-      class="bootstrap"
-      columnMode="flex"
+      class="bootstrap force-table"
+      columnMode="force"
       [headerHeight]="60"
       [footerHeight]="50"
+      [scrollLeft]="true"
       [rowHeight]="50"
-      [scrollbarV]="true"
+      [scrollbarV]="false"
     >
     </ngx-datatable>
-  
+
     <ng-template #actionTpl let-row="row">
-      <button class="btn-accion editar" (click)="editarProducto(row)">Editar</button>
-      <button class="btn-accion eliminar" (click)="eliminarProducto(row)">Eliminar</button>
+
+      <span class="material-symbols-outlined span-edit">
+        edit
+        </span>
+      <span class="btn-delete material-symbols-outlined span-delete">
+        delete
+        </span>
+
     </ng-template>
   </div>
-  
