@@ -1,16 +1,14 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../services/api.service';
-import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [FormsModule],
-  providers: [ApiService]
+  imports: [FormsModule, CommonModule]
 })
 export class LoginComponent {
   email: string = '';
@@ -22,23 +20,13 @@ export class LoginComponent {
     { email: 'user2@example.com', password: 'password2' }
   ];
 
-  constructor(private router: Router, private service: ApiService) {
-    this.service.getData().subscribe((data:any) => {
-      // this.users = data;
-      console.log(this.users);
-    });
-
-  }
+  constructor(private router: Router) {}
 
   onSubmit() {
-    console.log('Email:', this.email);
-    console.log('Password', this.password);
     const user = this.users.find(u => u.email === this.email && u.password === this.password);
-    console.log(user);
     if (user) {
-      const token = btoa(`${this.email}:${this.password}`); // Genera un token básico (Base64)
-      console.log(token)
-      localStorage.setItem('token', token); // Guarda el token en localStorage
+      const token = btoa(`${this.email}:${this.password}`);
+      localStorage.setItem('token', token);
       this.router.navigate(['/home']);
     } else {
       alert('Correo electrónico o contraseña incorrectos');

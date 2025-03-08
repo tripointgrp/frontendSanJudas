@@ -1,7 +1,109 @@
-.divider:after,
-.divider:before {
-content: "";
-flex: 1;
-height: 1px;
-background: #eee;
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap');
+
+* {
+  font-family: 'Raleway', sans-serif;
 }
+
+.vh-100 {
+  height: 100vh;
+}
+
+.container-fluid {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.left-section {
+  flex: 1.3;
+  background: linear-gradient(to bottom, #1D24CA, #0B179A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+}
+
+.left-section img {
+  max-width: 70%;
+  display: block;
+  margin-left: 15%;
+}
+
+.left-section .branding {
+  position: absolute;
+  bottom: 40px;
+  text-align: center;
+  color: white;
+  max-width: 180px;
+  height: auto;
+}
+
+.right-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFF;
+}
+
+.form-container {
+  width: 75%;
+  max-width: 400px;
+  position: relative;
+}
+
+h2 {
+  font-weight: bold;
+  color: #2C2C2C;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+p {
+  color: #cfcfcf;
+}
+
+.form-label {
+  color: #8D8D8D;
+  font-weight: 500;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #F4F4F4;    
+  height: 42px;
+  background-color: #F4F4F4;
+  margin-bottom: 30px;
+
+  &::placeholder {
+    color: #888;
+  }
+}
+
+.btn-primary {
+  background-color: #1D24CA;
+  border-radius: 10px;
+  font-size: 18px;
+  padding: 12px;
+  width: 60%;
+  display: block;
+  margin: 46px auto 0 auto;
+}
+
+.btn-primary:hover {
+  background-color: #000db3;
+}
+
+.span-view {
+  position: absolute;
+  top: 70%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 24px;
+}
+.span-view {
+    font-family: 'Material Symbols Outlined';
+  }
