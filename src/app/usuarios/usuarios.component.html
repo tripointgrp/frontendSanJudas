@@ -1,1 +1,38 @@
-<p>usuarios works!</p>
+<div class="usuarios-container">
+    <h1>USUARIOS</h1>
+
+    <div class="buscador-agregar-container">
+        <div class="buscador">
+            <input type="text" placeholder="Buscar usuario..." [(ngModel)]="searchTerm" (input)="filterUsuarios()" class="buscador-input" />
+            <span class="material-symbols-outlined buscador-icon">search</span>
+        </div>
+        <button class="submit-button" (click)="abrirModal()">Agregar usuario</button>
+    </div>
+
+    <ngx-datatable
+        [rows]="filteredRows"
+        [columns]="[
+            { prop: 'nombre', name: 'Nombre', flexGrow: 2 },
+            { prop: 'contacto', name: 'Contacto', flexGrow: 2 },
+            { prop: 'correo', name: 'Correo', flexGrow: 2 },
+            { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+        ]"
+        class="bootstrap"
+        columnMode="flex"
+        [headerHeight]="60"
+        [footerHeight]="50"
+        [rowHeight]="50"
+        [scrollbarV]="true"
+    >
+    </ngx-datatable>
+
+    <!-- Template para los iconos de acción -->
+    <ng-template #actionTpl let-row="row">
+        <span class="material-symbols-outlined span-edit" (click)="editarUsuario(row)">
+            edit
+        </span>
+        <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarUsuario(row)">
+            delete
+        </span>
+    </ng-template>
+</div>

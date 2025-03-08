@@ -1,1 +1,36 @@
-<p>presupuestos works!</p>
+<div class="presupuestos-container">
+    <h1>PRESUPUESTOS</h1>
+
+    <div class="buscador-agregar-container">
+        <div class="buscador">
+            <input type="text" placeholder="Buscar presupuesto..." [(ngModel)]="searchTerm" (input)="filterPresupuestos()" class="buscador-input" />
+            <span class="material-symbols-outlined buscador-icon">search</span>
+        </div>
+        <button class="submit-button" (click)="abrirModal()">Agregar presupuesto</button>
+    </div>
+
+    <ngx-datatable
+        [rows]="filteredRows"
+        [columns]="[
+            { prop: 'envio', name: 'Número de Envío', flexGrow: 1 },
+            { prop: 'escuela', name: 'Escuela', flexGrow: 2 },
+            { prop: 'fecha', name: 'Fecha', flexGrow: 2 },
+            { prop: 'montoTotal', name: 'Monto Total', flexGrow: 1 },
+            { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 }
+        ]"
+        class="bootstrap"
+        columnMode="flex"
+        [headerHeight]="60"
+        [footerHeight]="50"
+        [rowHeight]="50"
+        [scrollbarV]="true"
+    >
+    </ngx-datatable>
+
+    <!-- Template para el icono de detalle -->
+    <ng-template #detalleTpl let-row="row">
+        <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
+            visibility
+        </span>
+    </ng-template>
+</div>

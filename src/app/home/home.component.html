@@ -1,11 +1,11 @@
 <div class="home-container">
-  <h1>Bienvenido</h1>
-  <p>Has iniciado sesión correctamente.</p>
-  <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
-  <!-- Material Icons -->
-<span class="material-icons">home</span>
+  <h1>{{ title }}</h1>
+  <p class="description">{{ description }}</p>
 
-<!-- Material Symbols Outlined -->
-<span class="material-symbols-outlined">settings</span>
-
+  <div class="modules-grid">
+      <div *ngFor="let module of modules" class="module-card" (click)="navigateTo(module.route)">
+          <span class="material-symbols-outlined module-icon">{{ module.icon }}</span>
+          <h3>{{ module.name }}</h3>
+      </div>
+  </div>
 </div>

@@ -1,18 +1,28 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
   standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent {
-  constructor(private authService: AuthService, private router: Router) {}
+  title = 'Bienvenido al Sistema de Gestión';
+  description = 'Administra presupuestos, pedidos y más de forma eficiente y organizada';
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  modules = [
+    { name: 'Presupuestos', icon: 'attach_money', route: '/presupuestos' },
+    { name: 'Pedidos', icon: 'shopping_cart', route: '/pedidos' },
+    { name: 'Productos', icon: 'inventory', route: '/productos' },
+    { name: 'Escuelas', icon: 'school', route: '/escuelas' }
+  ];
+
+  constructor(private router: Router) {}
+
+  navigateTo(route: string) {
+    this.router.navigate([route]);
   }
 }

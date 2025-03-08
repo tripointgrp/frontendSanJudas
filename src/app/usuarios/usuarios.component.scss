@@ -1,0 +1,94 @@
+.usuarios-container {
+    padding: 20px;
+    border-radius: 20px;
+    min-height: 100vh;
+    color: #333333;
+    text-align: center;
+
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+        color: #1A20B6;
+        font-family: "Raleway", serif;
+    }
+
+    ngx-datatable {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        overflow-x: auto;
+    }
+
+    ::ng-deep .datatable-header {
+        background-color: #1D24CA;
+        color: #F5F5F5;
+        font-size: 0.8rem;
+        font-family: "Raleway", serif;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #D9A54A;
+        padding: 5px !important;
+    }
+
+    ::ng-deep .datatable-header-cell, ::ng-deep .datatable-body-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .datatable-body {
+        background-color: #FDF5E6;
+        color: #1D24CA;
+    }
+
+    .span-edit, .span-delete {
+        cursor: pointer;
+        padding: 8px;
+        font-size: 20px;
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+
+    .span-edit {
+        color: #1D24CA;
+    }
+
+    .span-delete {
+        color: #F32237;
+    }
+
+    .buscador-agregar-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .buscador {
+        position: relative;
+        flex-grow: 1;
+        margin-right: 20px;
+    }
+
+    .buscador-input {
+        width: 100%;
+        padding: 6px;
+        border-radius: 8px;
+        border: 0px;
+        background-color: #dddddd;
+        font-size: 12px;
+    }
+
+    .buscador-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        font-size: 20px;
+        pointer-events: none;
+    }
+}

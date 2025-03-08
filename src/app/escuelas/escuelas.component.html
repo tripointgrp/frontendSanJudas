@@ -1,28 +1,39 @@
 <div class="escuelas-container">
-    <h1>Escuelas</h1>
-    <button class="btn-agregar">Agregar Escuela</button>
-    <ngx-datatable
-  [rows]="rows"
-  [columns]="[
-    { prop: 'nombre', name: 'Nombre', flexGrow: 2 },
-    { prop: 'alias', name: 'Alias', flexGrow: 1 },
-    { prop: 'nit', name: 'NIT', flexGrow: 1 },
-    { prop: 'razonSocial', name: 'Razón Social', flexGrow: 2 },
-    { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
-  ]"
-  class="bootstrap"
-  columnMode="flex"
-  [headerHeight]="60"
-  [footerHeight]="50"
-  [rowHeight]="50"
-  [scrollbarV]="true"
->
-</ngx-datatable>
+  <h1>ESCUELAS</h1>
 
-<!-- Template para los botones de acción -->
-<ng-template #actionTpl let-row="row">
-  <button class="btn-accion editar" (click)="editarEscuela(row)">Editar</button>
-  <button class="btn-accion eliminar" (click)="eliminarEscuela(row)">Eliminar</button>
-</ng-template>
-
+  <div class="buscador-agregar-container">
+      <div class="buscador">
+          <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()" class="buscador-input" />
+          <span class="material-symbols-outlined buscador-icon">search</span>
+      </div>
+      <button class="submit-button" (click)="abrirModal()">Agregar escuela</button>
   </div>
+
+  <ngx-datatable
+      [rows]="filteredRows"
+      [columns]="[
+          { prop: 'nombre', name: 'Nombre', flexGrow: 2 },
+          { prop: 'alias', name: 'Alias', flexGrow: 1 },
+          { prop: 'nit', name: 'NIT', flexGrow: 1 },
+          { prop: 'razonSocial', name: 'Razón Social', flexGrow: 2 },
+          { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+      ]"
+      class="bootstrap"
+      columnMode="flex"
+      [headerHeight]="60"
+      [footerHeight]="50"
+      [rowHeight]="50"
+      [scrollbarV]="true"
+  >
+  </ngx-datatable>
+
+  <!-- Template para los iconos de acción -->
+  <ng-template #actionTpl let-row="row">
+      <span class="material-symbols-outlined span-edit" (click)="editarEscuela(row)">
+          edit
+      </span>
+      <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
+          delete
+      </span>
+  </ng-template>
+</div>
