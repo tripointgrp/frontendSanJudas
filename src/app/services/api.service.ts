@@ -9,6 +9,7 @@ import { environment } from '../../environments/environment';
 export class ApiService {
   private apiUrl = environment.apiUrl; // URL del backend desde environment.ts
   usuarios : string = 'api/usuarios/';
+  productos : string = 'api/productos/';
 
   constructor(private http: HttpClient) {}
 
@@ -17,18 +18,8 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}${this.usuarios}/obtener`);
   }
 
-  // // 🔹 Enviar datos al backend con POST
-  // sendData(data: any): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/ruta-del-endpoint`, data);
-  // }
-
-  // // 🔹 Editar un dato en el backend con PUT
-  // updateData(id: string, data: any): Observable<any> {
-  //   return this.http.put(`${this.apiUrl}/ruta-del-endpoint/${id}`, data);
-  // }
-
-  // // 🔹 Eliminar un dato del backend con DELETE
-  // deleteData(id: string): Observable<any> {
-  //   return this.http.delete(`${this.apiUrl}/ruta-del-endpoint/${id}`);
-  // }
+  //  Productos
+  obtenerProductos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}${this.productos}/obtener`);
+  }
 }

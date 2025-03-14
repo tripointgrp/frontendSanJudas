@@ -14,13 +14,17 @@ import { MantenimientosComponent } from './mantenimientos/mantenimientos.compone
 import { UsuariosComponent } from './usuarios/usuarios.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' }, // 🔹 Redirige a login por defecto
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
-  { path: '', component: LayoutComponent, canActivate: [AuthGuard], children: [
+  {
+    path: '',
+    component: LayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
       { path: 'home', component: HomeComponent },
       { path: 'usuarios', component: UsuariosComponent },
       { path: 'escuelas', component: EscuelasComponent },
-      { path: 'editar-escuelas', component: EditarEscuelasComponent },
+      { path: 'editar-escuelas/:id', component: EditarEscuelasComponent }, // 🔹 Ahora recibe un `id`
       { path: 'productos', component: ProductosComponent },
       { path: 'pedidos', component: PedidosComponent },
       { path: 'presupuestos', component: PresupuestosComponent },
@@ -28,6 +32,5 @@ export const routes: Routes = [
       { path: 'mantenimientos', component: MantenimientosComponent }
     ]
   },
-  { path: '**', redirectTo: 'home' }
+  { path: '**', redirectTo: 'login' } // 🔹 Redirige a login en rutas no encontradas
 ];
-

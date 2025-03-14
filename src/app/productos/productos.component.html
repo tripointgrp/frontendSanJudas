@@ -13,14 +13,14 @@
 
 
     <ngx-datatable
-      [rows]="rows"
+      [rows]="filteredRows"
       [columns]="[
-      { prop: 'nombre', name: 'Nombre del Producto', flexGrow: 4},
-      { prop: 'precio', name: 'Precio', flexGrow: 1 },
+      { prop: 'nombre', name: 'Nombre del Producto', flexGrow: 5},
+      { prop: 'precio_variable', name: 'Precio', flexGrow: 1 },
       { prop: 'marca', name: 'Marca', flexGrow: 1 },
-      { prop: 'categoria', name: 'Categoría', flexGrow: 1 },
-      { prop: 'unidad', name: 'U. Medida', flexGrow: 1 },
-      { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+      { prop: 'id_categoria.nombre', name: 'Categoría', flexGrow: 1 },
+      { prop: 'id_unidad_medida.nombre', name: 'U. Medida', flexGrow: 1 },
+      { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 1 }
       ]"
       class="bootstrap force-table"
       columnMode="force"

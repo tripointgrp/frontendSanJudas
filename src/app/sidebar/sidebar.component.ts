@@ -1,6 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,7 +12,7 @@ import { Injectable } from '@angular/core';
   encapsulation: ViewEncapsulation.None
 })
 export class SidebarComponent {
-    constructor(private router: Router) {}
+    constructor(private router: Router, private authService: AuthService) {}
 
     handleClick(item: any) {
       console.log('click', item);
@@ -20,8 +21,7 @@ export class SidebarComponent {
           this.router.navigate(['/home']);
           break;
         case 'logout':
-          localStorage.clear();
-          this.router.navigate(['/login']);
+          this.authService.logout();
           break;
         case 'escuelas':
           this.router.navigate(['/escuelas']);

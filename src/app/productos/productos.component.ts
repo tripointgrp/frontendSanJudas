@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms'
 import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { ApiService } from '../services/api.service';
 
 
 @Component({
@@ -22,29 +23,49 @@ export class ProductosComponent {
   actionButton = true;
   actionButtonText = 'Añadir producto';
   // Data
-  rows = [
-    { id:1 ,nombre: 'Harina de trigo', descripcion: 'Harina blanca refinada, 50 kg', precio: 25, marca: 'Molinos San Juan', categoria: 'Granos', unidad: 'Sacos' },
-    { id:2 ,nombre: 'Aceite vegetal', descripcion: 'Aceite comestible, 5 litros', precio: 15, marca: 'Oro Verde', categoria: 'Aceites', unidad: 'Garrafas' },
-    { id:3 ,nombre: 'Arroz extra', descripcion: 'Arroz blanco, grano largo, 25 kg', precio: 30, marca: 'La Hacienda', categoria: 'Granos', unidad: 'Sacos' },
-    { id:4 ,nombre: 'Pechuga de pollo', descripcion: 'Pechuga sin hueso, congelada', precio: 45, marca: 'Pollos Don Juan', categoria: 'Carnes', unidad: 'Cajas' },
-    { id:5 ,nombre: 'Leche entera', descripcion: 'Leche líquida pasteurizada, 1 litro', precio: 1.5, marca: 'Lácteos Del Valle', categoria: 'Lácteos', unidad: 'Litros' }
-  ];
-  filteredRows = [...this.rows]; // Copia inicial de los datos
+  rows: any[] = [];
+  filteredRows: any[] = [];
   searchTerm = '';
   cancelButtonText = 'Cancelar';
   form!: FormGroup;
+  loading = true; // Indicador de carga
+  errorMessage = ''; // Manejo de errores
 
-  constructor(private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private dialog: MatDialog, private fb: FormBuilder, private productosService: ApiService) {}
+
+  ngOnInit() {
+    this.obtenerProductos();
+  }
+
+  obtenerProductos() {
+    this.productosService.obtenerProductos().subscribe({
+      next: (data) => {
+        console.log('Productos:', data);
+        this.rows = data;
+        this.filteredRows = [...data];
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al obtener los productos';
+        console.error('Error en la consulta:', error);
+        this.loading = false;
+      }
+    });
+  }
 
   filterProducts() {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm?.toLowerCase() ?? ''; // Asegurar que no sea undefined
+    console.log('Filtrar productos:', this.searchTerm);
     this.filteredRows = this.rows.filter(product =>
-      product.nombre.toLowerCase().includes(term) ||
-      product.descripcion.toLowerCase().includes(term) ||
-      product.marca.toLowerCase().includes(term) ||
-      product.categoria.toLowerCase().includes(term)
+      (product.nombre?.toLowerCase() ?? '').includes(term) ||
+      (product.descripcion?.toLowerCase() ?? '').includes(term) ||
+      (product.marca?.toLowerCase() ?? '').includes(term) ||
+      (product.id_categoria?.nombre?.toLowerCase() ?? '').includes(term) || // Asegurar que `id_categoria.nombre` existe
+      (product.id_unidad_medida?.nombre?.toLowerCase() ?? '')?.includes(term) // Asegurar que `id_unidad_medida.nombre` existe
     );
   }
+
+
   editarProducto(row: any) {
     console.log('Editar producto:', row);
     // Lógica para editar producto

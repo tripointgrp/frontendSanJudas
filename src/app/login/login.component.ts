@@ -2,35 +2,39 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule, HttpClientModule]
 })
 export class LoginComponent {
   email: string = '';
   password: string = '';
   passwordVisible: boolean = false;
+  loading: boolean = false;
 
-  users = [
-    { email: 'abel@example.com', password: 'password1' },
-    { email: 'user2@example.com', password: 'password2' }
-  ];
-
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient, private authService: AuthService) {}
 
   onSubmit() {
-    const user = this.users.find(u => u.email === this.email && u.password === this.password);
-    if (user) {
-      const token = btoa(`${this.email}:${this.password}`);
-      localStorage.setItem('token', token);
-      this.router.navigate(['/home']);
-    } else {
-      alert('Correo electrónico o contraseña incorrectos');
-    }
+    this.loading = true; // Mostrar spinner o deshabilitar botón
+    this.http.post<any>('http://localhost:4000/api/usuarios/login', { correo: this.email, clave: this.password }).subscribe(
+      (response) => {
+        if (response.token) {
+          this.authService.setToken(response.token);
+          this.router.navigate(['/home']); // Redirigir si el login es exitoso
+        }
+        this.loading = false;
+      },
+      (error) => {
+        this.loading = false;
+        alert('Correo electrónico o contraseña incorrectos');
+        console.error('Error en login:', error);
+      }
+    );
   }
 
   togglePasswordVisibility() {
