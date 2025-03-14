@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -21,7 +22,7 @@ export class LoginComponent {
 
   onSubmit() {
     this.loading = true; // Mostrar spinner o deshabilitar botón
-    this.http.post<any>('http://localhost:4000/api/usuarios/login', { correo: this.email, clave: this.password }).subscribe(
+    this.http.post<any>(environment.apiUrl+'api/usuarios/login', { correo: this.email, clave: this.password }).subscribe(
       (response) => {
         if (response.token) {
           this.authService.setToken(response.token);
