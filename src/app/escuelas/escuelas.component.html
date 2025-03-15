@@ -1,39 +1,40 @@
 <div class="escuelas-container">
-  <h1>ESCUELAS</h1>
-
-  <div class="buscador-agregar-container">
+    <h1>ESCUELAS</h1>
+  
+    <div class="buscador-agregar-container">
       <div class="buscador">
-          <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()" class="buscador-input" />
-          <span class="material-symbols-outlined buscador-icon">search</span>
+        <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()" class="buscador-input" />
+        <span class="material-symbols-outlined buscador-icon">search</span>
       </div>
       <button class="submit-button" (click)="abrirModal()">Agregar escuela</button>
-  </div>
-
-  <ngx-datatable
+    </div>
+  
+    <ngx-datatable
       [rows]="filteredRows"
       [columns]="[
-          { prop: 'nombre', name: 'Nombre', flexGrow: 2 },
-          { prop: 'alias', name: 'Alias', flexGrow: 1 },
-          { prop: 'nit', name: 'NIT', flexGrow: 1 },
-          { prop: 'razonSocial', name: 'Razón Social', flexGrow: 2 },
-          { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+          { prop: 'nombre', name: 'Nombre', flexGrow: 5 },
+          { prop: 'nit', name: 'NIT', flexGrow: 2 },
+          { prop: 'razon_social', name: 'Razón Social', flexGrow: 3 },
+          { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 1 }
       ]"
-      class="bootstrap"
-      columnMode="flex"
+      class="bootstrap force-table"
+      columnMode="force"
       [headerHeight]="60"
       [footerHeight]="50"
+      [scrollLeft]="true"
       [rowHeight]="50"
-      [scrollbarV]="true"
-  >
-  </ngx-datatable>
-
-  <!-- Template para los iconos de acción -->
-  <ng-template #actionTpl let-row="row">
-      <span class="material-symbols-outlined span-edit" (click)="editarEscuela(row)">
-          edit
-      </span>
-      <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
-          delete
-      </span>
-  </ng-template>
-</div>
+      [scrollbarV]="false"
+    >
+    </ngx-datatable>
+  
+    <!-- Template para los iconos de acción -->
+    <ng-template #actionTpl let-row="row">
+        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+            edit
+        </span>
+        <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
+            delete
+        </span>
+    </ng-template>
+  </div>
+  

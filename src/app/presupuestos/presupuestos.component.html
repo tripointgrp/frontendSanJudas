@@ -13,17 +13,18 @@
         [rows]="filteredRows"
         [columns]="[
             { prop: 'envio', name: 'Número de Envío', flexGrow: 1 },
-            { prop: 'escuela', name: 'Escuela', flexGrow: 2 },
+            { prop: 'id_escuela', name: 'Escuela', flexGrow: 2 },
             { prop: 'fecha', name: 'Fecha', flexGrow: 2 },
-            { prop: 'montoTotal', name: 'Monto Total', flexGrow: 1 },
-            { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 }
+            { prop: 'monto_total', name: 'Monto Total', flexGrow: 1 },
+            { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
+            { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
         ]"
-        class="bootstrap"
+        class="bootstrap force-table"
         columnMode="flex"
         [headerHeight]="60"
         [footerHeight]="50"
         [rowHeight]="50"
-        [scrollbarV]="true"
+        [scrollbarV]="false"
     >
     </ngx-datatable>
 
@@ -31,6 +32,16 @@
     <ng-template #detalleTpl let-row="row">
         <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
             visibility
+        </span>
+    </ng-template>
+
+    <!-- Template para los iconos de acción -->
+    <ng-template #actionTpl let-row="row">
+        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+            edit
+        </span>
+        <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPresupuesto(row)">
+            delete
         </span>
     </ng-template>
 </div>

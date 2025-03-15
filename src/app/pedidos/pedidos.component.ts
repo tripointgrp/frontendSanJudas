@@ -1,24 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
-
-interface Producto {
-  nombre: string;
-  cantidad: number;
-  precio: number;
-}
-
-interface Pedido {
-  id: number;
-  escuela: string;
-  grado: string;
-  total: number;
-  fecha: string;
-  productos: Producto[];
-}
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'app-pedidos',
@@ -27,49 +14,50 @@ interface Pedido {
   templateUrl: './pedidos.component.html',
   styleUrls: ['./pedidos.component.scss']
 })
-export class PedidosComponent {
+export class PedidosComponent implements OnInit {
   title = 'Pedidos';
-  message = 'Gestión de pedidos';
-  cancelButton = true;
-  actionButton = true;
-  actionButtonText = 'Ver detalle';
-
-  rows: Pedido[] = [
-    {
-      id: 1, escuela: 'Escuela Central', grado: 'Primero', total: 250, fecha: '2025-03-07',
-      productos: [
-        { nombre: 'Leche', cantidad: 10, precio: 2.5 },
-        { nombre: 'Pan', cantidad: 20, precio: 1.5 }
-      ]
-    },
-    {
-      id: 2, escuela: 'Colegio San Juan', grado: 'Segundo', total: 180, fecha: '2025-03-06',
-      productos: [
-        { nombre: 'Jugo', cantidad: 15, precio: 2.0 },
-        { nombre: 'Galletas', cantidad: 10, precio: 1.8 }
-      ]
-    }
-  ];
-  
-  filteredRows = [...this.rows];
   searchTerm = '';
-  cancelButtonText = 'Cerrar';
+  rows: any[] = [];
+  filteredRows: any[] = [];
+  loading = true;
+  errorMessage = '';
   form!: FormGroup;
 
-  constructor(private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
 
+  ngOnInit() {
+    this.obtenerPedidos();
+  }
+
+  // 🔹 Obtener pedidos desde la API
+  obtenerPedidos() {
+    this.apiService.obtenerPedidos().subscribe({
+      next: (data) => {
+        console.log('Pedidos obtenidos:', data);
+        this.rows = data;
+        this.filteredRows = [...data];
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al obtener los pedidos';
+        console.error('Error en la consulta:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  // 🔹 Filtrar pedidos en la tabla
   filterPedidos() {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm?.toLowerCase() ?? '';
     this.filteredRows = this.rows.filter(pedido =>
-      pedido.escuela.toLowerCase().includes(term) ||
-      pedido.grado.toLowerCase().includes(term) ||
-      pedido.fecha.includes(term)
+      (pedido.escuela?.toLowerCase() ?? '').includes(term) ||
+      (pedido.grado?.toLowerCase() ?? '').includes(term) ||
+      (pedido.fecha_pedido ?? '').includes(term)
     );
   }
 
-  verDetalle(pedido: Pedido): void {
-    const productosHtml = pedido.productos.map((p: Producto) => `<p>${p.nombre} - ${p.cantidad} x $${p.precio.toFixed(2)}</p>`).join('');
-    
+  // 🔹 Ver detalles de un pedido
+  verDetalle(pedido: any): void {
     this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
@@ -78,51 +66,85 @@ export class PedidosComponent {
         message: `
           <b>Escuela:</b> ${pedido.escuela}<br>
           <b>Grado:</b> ${pedido.grado}<br>
-          <b>Fecha:</b> ${pedido.fecha}<br>
-          <b>Productos:</b><br>
-          ${productosHtml}
+          <b>Fecha:</b> ${pedido.fecha_pedido}<br>
+          <b>Total:</b> $${pedido.total.toFixed(2)}
         `,
-        showCancelButton: this.cancelButton,
-        cancelButtonText: this.cancelButtonText,
+        showCancelButton: true,
+        cancelButtonText: 'Cerrar',
         showActionButton: false
       }
     });
   }
 
-  abrirModal(): void {
+  // 🔹 Abrir modal para agregar o editar un pedido
+  abrirModal(pedido: any = null): void {
     this.form = this.fb.group({
-      escuela: ['', Validators.required],
-      grado: ['', Validators.required],
-      fecha: ['', Validators.required],
-      productos: ['', Validators.required]
+      escuela: [pedido?.escuela || '', Validators.required],
+      grado: [pedido?.grado || '', Validators.required],
+      fecha_pedido: [pedido?.fecha_pedido || '', Validators.required],
+      total: [pedido?.total || '', Validators.required]
     });
 
     const dialogRef = this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
       data: {
-        title: 'Nuevo Pedido',
-        message: 'Ingrese los detalles del pedido',
-        showCancelButton: this.cancelButton,
+        title: pedido ? 'Editar Pedido' : 'Agregar Pedido',
+        message: 'Ingrese los datos del pedido',
+        showCancelButton: true,
         cancelButtonText: 'Cancelar',
         showActionButton: true,
-        actionButtonText: 'Agregar',
-        form: this.form,
-        fields: [
-          { label: 'Escuela', name: 'escuela', type: 'text', placeholder: 'Nombre de la escuela' },
-          { label: 'Grado', name: 'grado', type: 'text', placeholder: 'Grado escolar' },
-          { label: 'Fecha', name: 'fecha', type: 'date', placeholder: 'Fecha del pedido' },
-          { label: 'Productos', name: 'productos', type: 'textarea', placeholder: 'Lista de productos' }
-        ]
+        actionButtonText: pedido ? 'Actualizar' : 'Guardar',
+        form: this.form
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (pedido) {
+          this.actualizarPedido(pedido._id, result);
+        } else {
+          this.agregarPedido(result);
+        }
       }
     });
   }
 
-  editarPedido(row: Pedido) {
-    console.log('Editar pedido:', row);
+  // 🔹 Agregar un nuevo pedido a la API
+  agregarPedido(nuevoPedido: any) {
+    this.apiService.crearPedido(nuevoPedido).subscribe({
+      next: () => {
+        this.obtenerPedidos();
+      },
+      error: (error) => {
+        console.error('Error al agregar pedido:', error);
+      }
+    });
   }
 
-  eliminarPedido(row: Pedido) {
-    console.log('Eliminar pedido:', row);
+  // 🔹 Actualizar un pedido en la API
+  actualizarPedido(id: string, pedido: any) {
+    this.apiService.actualizarPedido(id, pedido).subscribe({
+      next: () => {
+        this.obtenerPedidos();
+      },
+      error: (error) => {
+        console.error('Error al actualizar pedido:', error);
+      }
+    });
+  }
+
+  // 🔹 Eliminar un pedido de la API
+  eliminarPedido(pedido: any) {
+    if (confirm(`¿Seguro que deseas eliminar el pedido de la escuela "${pedido.escuela}"?`)) {
+      this.apiService.eliminarPedido(pedido._id).subscribe({
+        next: () => {
+          this.obtenerPedidos();
+        },
+        error: (error) => {
+          console.error('Error al eliminar pedido:', error);
+        }
+      });
+    }
   }
 }

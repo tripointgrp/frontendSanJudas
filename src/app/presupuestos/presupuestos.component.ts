@@ -1,25 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
-
-interface ProductoPresupuesto {
-  nombre: string;
-  precioUnitario: number;
-  cantidad: number;
-  total: number;
-}
-
-interface Presupuesto {
-  id: number;
-  envio: string;
-  escuela: string;
-  fecha: string;
-  montoTotal: number;
-  productos: ProductoPresupuesto[];
-}
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'app-presupuestos',
@@ -28,50 +14,50 @@ interface Presupuesto {
   templateUrl: './presupuestos.component.html',
   styleUrls: ['./presupuestos.component.scss']
 })
-export class PresupuestosComponent {
+export class PresupuestosComponent implements OnInit {
   title = 'Presupuestos';
-  message = 'Gestión de presupuestos';
-  cancelButton = true;
-  actionButton = true;
-  actionButtonText = 'Ver detalle';
-
-  rows: Presupuesto[] = [
-    {
-      id: 1, envio: 'ENVIO 3', escuela: 'Escuela Central', fecha: '2025-03-07', montoTotal: 450,
-      productos: [
-        { nombre: 'Azúcar', precioUnitario: 4.50, cantidad: 76, total: 342 },
-        { nombre: 'Raja de canela', precioUnitario: 3.00, cantidad: 36, total: 108 }
-      ]
-    },
-    {
-      id: 2, envio: 'ENVIO 4', escuela: 'Colegio San Juan', fecha: '2025-03-06', montoTotal: 170,
-      productos: [
-        { nombre: 'Leche', precioUnitario: 2.50, cantidad: 50, total: 125 },
-        { nombre: 'Pan', precioUnitario: 1.50, cantidad: 30, total: 45 }
-      ]
-    }
-  ];
-  
-  filteredRows = [...this.rows];
   searchTerm = '';
-  cancelButtonText = 'Cerrar';
+  rows: any[] = [];
+  filteredRows: any[] = [];
+  loading = true;
+  errorMessage = '';
   form!: FormGroup;
 
-  constructor(private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
 
+  ngOnInit() {
+    this.obtenerPresupuestos();
+  }
+
+  // 🔹 Obtener Presupuestos desde la API
+  obtenerPresupuestos() {
+    this.apiService.obtenerPresupuestos().subscribe({
+      next: (data) => {
+        console.log('Presupuestos obtenidos:', data);
+        this.rows = data;
+        this.filteredRows = [...data];
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al obtener los presupuestos';
+        console.error('Error en la consulta:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  // 🔹 Filtrar Presupuestos en la Tabla
   filterPresupuestos() {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm?.toLowerCase() ?? '';
     this.filteredRows = this.rows.filter(presupuesto =>
-      presupuesto.envio.toLowerCase().includes(term) ||
-      presupuesto.escuela.toLowerCase().includes(term) ||
-      presupuesto.fecha.includes(term)
+      (presupuesto.envio?.toLowerCase() ?? '').includes(term) ||
+      (presupuesto.escuela?.toLowerCase() ?? '').includes(term) ||
+      (presupuesto.fecha?.includes(term) ?? false)
     );
   }
 
-  verDetalle(presupuesto: Presupuesto): void {
-    const productosHtml = presupuesto.productos.map((p: ProductoPresupuesto) => 
-      `<p>${p.nombre} - ${p.cantidad} x Q${p.precioUnitario.toFixed(2)} = Q${p.total.toFixed(2)}</p>`).join('');
-    
+  // 🔹 Ver Detalle del Presupuesto
+  verDetalle(presupuesto: any): void {
     this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
@@ -81,45 +67,85 @@ export class PresupuestosComponent {
           <b>Envío:</b> ${presupuesto.envio}<br>
           <b>Escuela:</b> ${presupuesto.escuela}<br>
           <b>Fecha:</b> ${presupuesto.fecha}<br>
-          <b>Monto Total:</b> Q${presupuesto.montoTotal}<br>
-          <b>Productos:</b><br>
-          ${productosHtml}
+          <b>Monto Total:</b> Q${presupuesto.monto_total}
         `,
-        showCancelButton: this.cancelButton,
-        cancelButtonText: this.cancelButtonText,
+        showCancelButton: true,
+        cancelButtonText: 'Cerrar',
         showActionButton: false
       }
     });
   }
 
-  abrirModal(): void {
+  // 🔹 Abrir Modal para Agregar o Editar Presupuesto
+  abrirModal(presupuesto: any = null): void {
     this.form = this.fb.group({
-      envio: ['', Validators.required],
-      escuela: ['', Validators.required],
-      fecha: ['', Validators.required],
-      montoTotal: ['', Validators.required],
-      productos: ['', Validators.required]
+      envio: [presupuesto?.envio || '', Validators.required],
+      escuela: [presupuesto?.escuela || '', Validators.required],
+      fecha: [presupuesto?.fecha || '', Validators.required],
+      monto_total: [presupuesto?.monto_total || '', Validators.required]
     });
 
-    this.dialog.open(ModalDialogComponent, {
+    const dialogRef = this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
       data: {
-        title: 'Nuevo Presupuesto',
-        message: 'Ingrese los detalles del presupuesto',
-        showCancelButton: this.cancelButton,
+        title: presupuesto ? 'Editar Presupuesto' : 'Agregar Presupuesto',
+        columns: 1,
+        message: 'Ingrese los datos del presupuesto',
+        showCancelButton: true,
         cancelButtonText: 'Cancelar',
         showActionButton: true,
-        actionButtonText: 'Agregar',
-        form: this.form,
-        fields: [
-          { label: 'Envío', name: 'envio', type: 'text', placeholder: 'Número de envío' },
-          { label: 'Escuela', name: 'escuela', type: 'text', placeholder: 'Nombre de la escuela' },
-          { label: 'Fecha', name: 'fecha', type: 'date', placeholder: 'Fecha del presupuesto' },
-          { label: 'Monto Total', name: 'montoTotal', type: 'number', placeholder: 'Monto total' },
-          { label: 'Productos', name: 'productos', type: 'textarea', placeholder: 'Lista de productos' }
-        ]
+        actionButtonText: presupuesto ? 'Actualizar' : 'Guardar',
+        form: this.form
       }
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (presupuesto) {
+          this.actualizarPresupuesto(presupuesto._id, result);
+        } else {
+          this.agregarPresupuesto(result);
+        }
+      }
+    });
+  }
+
+  // 🔹 Agregar Presupuesto
+  agregarPresupuesto(nuevoPresupuesto: any) {
+    this.apiService.crearPresupuesto(nuevoPresupuesto).subscribe({
+      next: () => {
+        this.obtenerPresupuestos();
+      },
+      error: (error) => {
+        console.error('Error al agregar presupuesto:', error);
+      }
+    });
+  }
+
+  // 🔹 Actualizar Presupuesto
+  actualizarPresupuesto(id: string, presupuesto: any) {
+    this.apiService.actualizarPresupuesto(id, presupuesto).subscribe({
+      next: () => {
+        this.obtenerPresupuestos();
+      },
+      error: (error) => {
+        console.error('Error al actualizar presupuesto:', error);
+      }
+    });
+  }
+
+  // 🔹 Eliminar Presupuesto
+  eliminarPresupuesto(presupuesto: any) {
+    if (confirm(`¿Seguro que deseas eliminar el presupuesto de "${presupuesto.escuela}"?`)) {
+      this.apiService.eliminarPresupuesto(presupuesto._id).subscribe({
+        next: () => {
+          this.obtenerPresupuestos();
+        },
+        error: (error) => {
+          console.error('Error al eliminar presupuesto:', error);
+        }
+      });
+    }
   }
 }

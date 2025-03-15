@@ -12,18 +12,18 @@
     <ngx-datatable
         [rows]="filteredRows"
         [columns]="[
-            { prop: 'escuela', name: 'Escuela', flexGrow: 2 },
-            { prop: 'grado', name: 'Grado', flexGrow: 1 },
-            { prop: 'fecha', name: 'Fecha', flexGrow: 2 },
+            { prop: 'id_escuela', name: 'Escuela', flexGrow: 2 },
+            { prop: 'id_grado', name: 'Grado', flexGrow: 1 },
+            { prop: 'fecha_pedido', name: 'Fecha', flexGrow: 2 },
             { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
             { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
         ]"
-        class="bootstrap"
-        columnMode="flex"
+        class="bootstrap force-table"
+        columnMode="force"
         [headerHeight]="60"
         [footerHeight]="50"
         [rowHeight]="50"
-        [scrollbarV]="true"
+        [scrollbarV]="false"
     >
     </ngx-datatable>
 
@@ -36,7 +36,7 @@
 
     <!-- Template para los iconos de acción -->
     <ng-template #actionTpl let-row="row">
-        <span class="material-symbols-outlined span-edit" (click)="editarPedido(row)">
+        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
             edit
         </span>
         <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPedido(row)">

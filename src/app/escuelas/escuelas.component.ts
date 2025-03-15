@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'app-escuelas',
@@ -12,78 +14,117 @@ import { MatDialog } from '@angular/material/dialog';
   templateUrl: './escuelas.component.html',
   styleUrls: ['./escuelas.component.scss']
 })
-export class EscuelasComponent {
+export class EscuelasComponent implements OnInit {
   title = 'Escuelas';
-  message = 'Gestión de escuelas';
-  cancelButton = true;
-  actionButton = true;
-  actionButtonText = 'Añadir escuela';
-  
-  rows = [
-    { id: 1, nombre: 'Escuela Central', alias: 'EC', nit: '12345678', razonSocial: 'Escuela Central S.A.' },
-    { id: 2, nombre: 'Colegio San Juan', alias: 'CSJ', nit: '87654321', razonSocial: 'Colegio San Juan Ltda.' },
-    { id: 3, nombre: 'Academia del Futuro', alias: 'ADF', nit: '13579246', razonSocial: 'Academia del Futuro Corp.' }
-  ];
-  filteredRows = [...this.rows];
   searchTerm = '';
-  cancelButtonText = 'Cancelar';
+  rows: any[] = [];
+  filteredRows: any[] = [];
+  loading = true;
+  errorMessage = '';
   form!: FormGroup;
 
-  constructor(private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
 
+  ngOnInit() {
+    this.obtenerEscuelas();
+  }
+
+  // 🔹 Obtener escuelas desde la API
+  obtenerEscuelas() {
+    this.apiService.obtenerEscuelas().subscribe({
+      next: (data) => {
+        console.log('Escuelas obtenidas:', data);
+        this.rows = data;
+        this.filteredRows = [...data];
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al obtener las escuelas';
+        console.error('Error en la consulta:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  // 🔹 Filtrar escuelas en la tabla
   filterEscuelas() {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm?.toLowerCase() ?? '';
     this.filteredRows = this.rows.filter(escuela =>
-      escuela.nombre.toLowerCase().includes(term) ||
-      escuela.alias.toLowerCase().includes(term) ||
-      escuela.nit.toLowerCase().includes(term) ||
-      escuela.razonSocial.toLowerCase().includes(term)
+      (escuela.nombre?.toLowerCase() ?? '').includes(term) ||
+      (escuela.nit?.toLowerCase() ?? '').includes(term) ||
+      (escuela.razon_social?.toLowerCase() ?? '').includes(term)
     );
   }
 
-  abrirModal(): void {
+  // 🔹 Abrir modal para agregar o editar escuela
+  abrirModal(escuela: any = null): void {
     this.form = this.fb.group({
-      nombre: ['', Validators.required],
-      alias: ['', Validators.required],
-      nit: ['', [Validators.required]],
-      razonSocial: ['', [Validators.required]],
+      nombre: [escuela?.nombre || '', Validators.required],
+      nit: [escuela?.nit || '', Validators.required],
+      razon_social: [escuela?.razon_social || '', Validators.required],
     });
 
     const dialogRef = this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
       data: {
-        title: this.title,
+        title: escuela ? 'Editar Escuela' : 'Agregar Escuela',
         columns: 1,
-        message: this.message,
-        showCancelButton: this.cancelButton,
-        cancelButtonText: this.cancelButtonText,
-        showActionButton: this.actionButton,
-        actionButtonText: this.actionButtonText,
-        form: this.form,
-        fields: [
-          { label: 'Nombre', name: 'nombre', type: 'text', placeholder: 'Nombre de la escuela' },
-          { label: 'Alias', name: 'alias', type: 'text', placeholder: 'Alias de la escuela' },
-          { label: 'NIT', name: 'nit', type: 'text', placeholder: 'Número de NIT' },
-          { label: 'Razón Social', name: 'razonSocial', type: 'text', placeholder: 'Razón Social' },
-        ],
+        message: 'Ingrese los datos de la escuela',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        showActionButton: true,
+        actionButtonText: escuela ? 'Actualizar' : 'Guardar',
+        form: this.form
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Acción principal confirmada');
-      } else {
-        console.log('Modal cerrado sin acción');
+        if (escuela) {
+          this.actualizarEscuela(escuela._id, result);
+        } else {
+          this.agregarEscuela(result);
+        }
       }
     });
   }
 
-  editarEscuela(row: any) {
-    console.log('Editar escuela:', row);
+  // 🔹 Agregar una nueva escuela a la API
+  agregarEscuela(nuevaEscuela: any) {
+    this.apiService.crearEscuela(nuevaEscuela).subscribe({
+      next: () => {
+        this.obtenerEscuelas();
+      },
+      error: (error) => {
+        console.error('Error al agregar escuela:', error);
+      }
+    });
   }
 
-  eliminarEscuela(row: any) {
-    console.log('Eliminar escuela:', row);
+  // 🔹 Actualizar una escuela en la API
+  actualizarEscuela(id: string, escuela: any) {
+    this.apiService.actualizarEscuela(id, escuela).subscribe({
+      next: () => {
+        this.obtenerEscuelas();
+      },
+      error: (error) => {
+        console.error('Error al actualizar escuela:', error);
+      }
+    });
+  }
+
+  // 🔹 Eliminar una escuela de la API
+  eliminarEscuela(escuela: any) {
+    if (confirm(`¿Seguro que deseas eliminar la escuela "${escuela.nombre}"?`)) {
+      this.apiService.eliminarEscuela(escuela._id).subscribe({
+        next: () => {
+          this.obtenerEscuelas();
+        },
+        error: (error) => {
+          console.error('Error al eliminar escuela:', error);
+        }
+      });
+    }
   }
 }

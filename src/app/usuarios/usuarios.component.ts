@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'app-usuarios',
@@ -12,78 +14,118 @@ import { MatDialog } from '@angular/material/dialog';
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.scss']
 })
-export class UsuariosComponent {
+export class UsuariosComponent implements OnInit {
   title = 'Usuarios';
-  message = 'Gestión de usuarios';
-  cancelButton = true;
-  actionButton = true;
-  actionButtonText = 'Añadir usuario';
-  
-  rows = [
-    { id: 1, nombre: 'Juan Pérez', contacto: '4455-1234', correo: 'juan@example.com' },
-    { id: 2, nombre: 'María López', contacto: '4555-5678', correo: 'maria@example.com' },
-    { id: 3, nombre: 'Carlos Gómez', contacto: '3555-9876', correo: 'carlos@example.com' }
-  ];
-  filteredRows = [...this.rows];
   searchTerm = '';
-  cancelButtonText = 'Cancelar';
+  rows: any[] = [];
+  filteredRows: any[] = [];
+  loading = true;
+  errorMessage = '';
   form!: FormGroup;
 
-  constructor(private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
 
+  ngOnInit() {
+    this.obtenerUsuarios();
+  }
+
+  // 🔹 Obtener usuarios desde la API
+  obtenerUsuarios() {
+    this.apiService.obtenerUsuarios().subscribe({
+      next: (data) => {
+        console.log('Usuarios obtenidos:', data);
+        this.rows = data;
+        this.filteredRows = [...data];
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al obtener los usuarios';
+        console.error('Error en la consulta:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  // 🔹 Filtrar usuarios en la tabla
   filterUsuarios() {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm?.toLowerCase() ?? '';
     this.filteredRows = this.rows.filter(usuario =>
-      usuario.nombre.toLowerCase().includes(term) ||
-      usuario.contacto.toLowerCase().includes(term) ||
-      usuario.correo.toLowerCase().includes(term)
+      (usuario.nombre?.toLowerCase() ?? '').includes(term) ||
+      (usuario.contacto?.toLowerCase() ?? '').includes(term) ||
+      (usuario.correo?.toLowerCase() ?? '').includes(term)
     );
   }
 
-  abrirModal(): void {
+  // 🔹 Abrir modal para agregar o editar usuario
+  abrirModal(usuario: any = null): void {
     this.form = this.fb.group({
-      nombre: ['', Validators.required],
-      contacto: ['', Validators.required],
-      correo: ['', [Validators.required, Validators.email]],
-      contrasena: ['', [Validators.required, Validators.minLength(6)]]
+      nombre: [usuario?.nombre || '', Validators.required],
+      contacto: [usuario?.contacto || '', Validators.required],
+      correo: [usuario?.correo || '', [Validators.required, Validators.email]],
+      clave: [usuario ? '' : '', usuario ? [] : [Validators.required, Validators.minLength(6)]]
     });
 
     const dialogRef = this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
       data: {
-        title: this.title,
+        title: usuario ? 'Editar Usuario' : 'Agregar Usuario',
         columns: 1,
-        message: this.message,
-        showCancelButton: this.cancelButton,
-        cancelButtonText: this.cancelButtonText,
-        showActionButton: this.actionButton,
-        actionButtonText: this.actionButtonText,
-        form: this.form,
-        fields: [
-          { label: 'Nombre', name: 'nombre', type: 'text', placeholder: 'Nombre del usuario' },
-          { label: 'Contacto', name: 'contacto', type: 'text', placeholder: 'Número de contacto' },
-          { label: 'Correo', name: 'correo', type: 'email', placeholder: 'Correo electrónico' },
-          { label: 'Contraseña', name: 'contrasena', type: 'password', placeholder: 'Contraseña' }
-        ],
+        message: 'Ingrese los datos del usuario',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        showActionButton: true,
+        actionButtonText: usuario ? 'Actualizar' : 'Guardar',
+        form: this.form
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Acción principal confirmada');
-      } else {
-        console.log('Modal cerrado sin acción');
+        if (usuario) {
+          this.actualizarUsuario(usuario._id, result);
+        } else {
+          this.agregarUsuario(result);
+        }
       }
     });
   }
 
-  editarUsuario(row: any) {
-    console.log('Editar usuario:', row);
+  // 🔹 Agregar un nuevo usuario a la API
+  agregarUsuario(nuevoUsuario: any) {
+    this.apiService.crearUsuario(nuevoUsuario).subscribe({
+      next: () => {
+        this.obtenerUsuarios();
+      },
+      error: (error) => {
+        console.error('Error al agregar usuario:', error);
+      }
+    });
   }
 
-  eliminarUsuario(row: any) {
-    console.log('Eliminar usuario:', row);
+  // 🔹 Actualizar un usuario en la API
+  actualizarUsuario(id: string, usuario: any) {
+    this.apiService.actualizarUsuario(id, usuario).subscribe({
+      next: () => {
+        this.obtenerUsuarios();
+      },
+      error: (error) => {
+        console.error('Error al actualizar usuario:', error);
+      }
+    });
+  }
+
+  // 🔹 Eliminar un usuario de la API
+  eliminarUsuario(usuario: any) {
+    if (confirm(`¿Seguro que deseas eliminar el usuario "${usuario.nombre}"?`)) {
+      this.apiService.eliminarUsuario(usuario._id).subscribe({
+        next: () => {
+          this.obtenerUsuarios();
+        },
+        error: (error) => {
+          console.error('Error al eliminar usuario:', error);
+        }
+      });
+    }
   }
 }
-
