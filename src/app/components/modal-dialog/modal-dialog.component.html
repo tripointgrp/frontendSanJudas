@@ -2,18 +2,34 @@
 
 <mat-dialog-content>
   <form [formGroup]="form">
-    <!-- Contenedor de los inputs con grid dinámico -->
     <div class="grid-container" [ngStyle]="{'grid-template-columns': 'repeat(' + (data.columns || 1) + ', 1fr)'}">
       <div class="input-container" *ngFor="let field of data.fields">
         <label class="input-label">{{ field.label }}</label>
+
+        <!-- 🟢 Input Normal -->
         <input
+          *ngIf="field.type !== 'select'"
           class="custom-input"
           [class.input-error]="form.controls[field.name].invalid && form.controls[field.name].touched"
           [type]="field.type"
           [formControlName]="field.name"
           [placeholder]="field.placeholder"
         />
-        <!-- Mensajes de error -->
+
+        <!-- 🔵 Select -->
+        <select
+          *ngIf="field.type === 'select'"
+          class="custom-input"
+          [class.input-error]="form.controls[field.name].invalid && form.controls[field.name].touched"
+          [formControlName]="field.name"
+        >
+          <option value="" disabled>{{ field.placeholder }}</option>
+          <option *ngFor="let option of field.options" [value]="option.value" [selected]="option.value === form.controls[field.name].value">
+            {{ option.label }}
+          </option>
+        </select>
+
+        <!-- 🛑 Mensajes de error -->
         <div class="error-message" *ngIf="form.controls[field.name].invalid && form.controls[field.name].touched">
           <span *ngIf="form.controls[field.name].errors?.['required']">⚠ Este campo es obligatorio</span>
           <span *ngIf="form.controls[field.name].errors?.['email']">⚠ Ingrese un correo válido</span>

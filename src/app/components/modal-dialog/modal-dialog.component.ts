@@ -33,7 +33,7 @@ export class ModalDialogComponent {
       this.dialogRef.close(this.form.value);
     } else {
       console.log('The form is not valid');
-      this.toastr.error('The form is not valid', 'Error')
+      this.toastr.error('El formulario no es válido', 'Error')
       this.form.markAllAsTouched();
     }
   }

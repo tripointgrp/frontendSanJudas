@@ -7,7 +7,6 @@ import { ProductosComponent } from './productos/productos.component';
 import { PedidosComponent } from './pedidos/pedidos.component';
 import { PresupuestosComponent } from './presupuestos/presupuestos.component';
 import { ReportesComponent } from './reportes/reportes.component';
-import { EditarEscuelasComponent } from './escuelas/editar-escuelas/editar-escuelas.component';
 import { LoginGuard } from './guards/login.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { MantenimientosComponent } from './mantenimientos/mantenimientos.component';
@@ -24,7 +23,7 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'usuarios', component: UsuariosComponent },
       { path: 'escuelas', component: EscuelasComponent },
-      { path: 'editar-escuelas/:id', component: EditarEscuelasComponent }, // 🔹 Ahora recibe un `id`
+      // { path: 'editar-escuelas/:id', component: EditarEscuelasComponent }, // 🔹 Ahora recibe un `id`
       { path: 'productos', component: ProductosComponent },
       { path: 'pedidos', component: PedidosComponent },
       { path: 'presupuestos', component: PresupuestosComponent },

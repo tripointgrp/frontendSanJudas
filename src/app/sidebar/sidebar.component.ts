@@ -26,9 +26,6 @@ export class SidebarComponent {
         case 'escuelas':
           this.router.navigate(['/escuelas']);
           break;
-        case 'editar-escuelas':
-          this.router.navigate(['/editar-escuelas']);
-          break;
         case 'productos':
           this.router.navigate(['/productos']);
           break;

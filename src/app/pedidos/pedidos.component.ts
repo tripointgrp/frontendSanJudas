@@ -6,6 +6,7 @@ import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { ModalDialogPedidoComponent } from '../components/modal-dialog-pedido/modal-dialog-pedido.component';
 
 @Component({
   selector: 'app-pedidos',
@@ -76,39 +77,39 @@ export class PedidosComponent implements OnInit {
     });
   }
 
-  // 🔹 Abrir modal para agregar o editar un pedido
   abrirModal(pedido: any = null): void {
-    this.form = this.fb.group({
-      escuela: [pedido?.escuela || '', Validators.required],
-      grado: [pedido?.grado || '', Validators.required],
-      fecha_pedido: [pedido?.fecha_pedido || '', Validators.required],
-      total: [pedido?.total || '', Validators.required]
-    });
-
-    const dialogRef = this.dialog.open(ModalDialogComponent, {
-      width: '726px',
+    const dialogRef = this.dialog.open(ModalDialogPedidoComponent, {
+      maxWidth: 'none', // 🔹 Permite que el diálogo tome el tamaño definido en width
+      width: '90vw',   // 🔹 El 90% del ancho de la ventana
+      height: '80vh',  // 🔹 El 80% del alto de la ventana
       disableClose: false,
       data: {
         title: pedido ? 'Editar Pedido' : 'Agregar Pedido',
         message: 'Ingrese los datos del pedido',
         showCancelButton: true,
+        columns: 2,
         cancelButtonText: 'Cancelar',
         showActionButton: true,
         actionButtonText: pedido ? 'Actualizar' : 'Guardar',
-        form: this.form
+        escuelas: [
+          { id: '1', nombre: 'Escuela Central' },
+          { id: '2', nombre: 'Colegio San Juan' }
+        ],
+        productos: [
+          { id: 'p1', nombre: 'Leche' },
+          { id: 'p2', nombre: 'Pan' }
+        ],
+        grados: ['Grado 1', 'Grado 2', 'Grado 3'] // Simulación de grados
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        if (pedido) {
-          this.actualizarPedido(pedido._id, result);
-        } else {
-          this.agregarPedido(result);
-        }
+        console.log('Pedido guardado:', result);
       }
     });
   }
+
 
   // 🔹 Agregar un nuevo pedido a la API
   agregarPedido(nuevoPedido: any) {

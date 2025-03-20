@@ -12,6 +12,8 @@ export class ApiService {
   productos : string = 'api/productos/';
   escuelas: string = 'api/escuelas/';
   pedidos: string = 'api/pedidos/';
+  categoria: string = 'api/categorias/';
+  unidadm: string = 'api/unidades_medida/';
   constructor(private http: HttpClient) {}
 
   //  Obtener todos los datos desde el backend
@@ -23,6 +25,21 @@ export class ApiService {
   obtenerProductos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}${this.productos}/obtener`);
   }
+
+  eliminarProducto(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}${this.productos}eliminar/${id}`);
+  }
+
+  crearProducto(producto: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}${this.productos}crear`, producto);
+  }
+
+  actualizarProducto(id: string, producto: any): Observable<any> {
+    console.log('Actualizar id:', id);
+    console.log('Actualizar producto:', producto);
+    return this.http.put<any>(`${this.apiUrl}${this.productos}actualizar/${id}`, producto);
+  }
+
 
 
  // CRUD ESCUELAS ----------------------------------------------------------------------
@@ -50,7 +67,7 @@ actualizarEscuela(id: string, escuela: any): Observable<any> {
 eliminarEscuela(id: string): Observable<any> {
   return this.http.delete<any>(`${this.apiUrl}${this.escuelas}eliminar/${id}`);
 }
- 
+
 
 // CRUD USUARIOS ----------------------------------------------------------------------
 obtenerUsuarios(): Observable<any[]> {
@@ -120,6 +137,19 @@ actualizarPresupuesto(id: string, presupuesto: any): Observable<any> {
 eliminarPresupuesto(id: string): Observable<any> {
   return this.http.delete<any>(`${this.apiUrl}api/presupuestos/eliminar/${id}`);
 }
+
+// CRUD CATEGORIAS ----------------------------------------------------------------------
+//  CATEGORIAS: CRUD API
+obtenerCategorias(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}${this.categoria}obtener`);
+}
+
+
+//CRUD UNIDAD DE MEDIDA
+obtenerUnidadMedida(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}${this.unidadm}obtener`);
+}
+
 
 }
 

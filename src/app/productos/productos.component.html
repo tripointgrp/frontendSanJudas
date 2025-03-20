@@ -33,11 +33,10 @@
     </ngx-datatable>
 
     <ng-template #actionTpl let-row="row">
-
-      <span class="material-symbols-outlined span-edit">
+      <span (click)="editarProducto(row)" class="material-symbols-outlined span-edit">
         edit
-        </span>
-      <span class="btn-delete material-symbols-outlined span-delete">
+      </span>
+      <span (click)="eliminarProducto(row)" class="btn-delete material-symbols-outlined span-delete">
         delete
         </span>
 

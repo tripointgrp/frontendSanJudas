@@ -1,0 +1,112 @@
+<h2 mat-dialog-title>{{ data.title || 'Formulario de Pedido' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <div class="grid-container" [ngStyle]="{'grid-template-columns': 'repeat(' + (data.columns || 1) + ', 1fr)'}">
+
+      <!-- 🔹 Datos Generales -->
+      <fieldset class="section">
+        <legend>Datos del Pedido</legend>
+
+        <!-- Escuela -->
+        <div class="input-container">
+          <label class="input-label">Escuela</label>
+          <select class="custom-input" formControlName="escuela">
+            <option value="" disabled selected>Seleccione una escuela</option>
+            <option *ngFor="let escuela of data.escuelas" [value]="escuela.id">
+              {{ escuela.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Fechas -->
+        <div class="input-container">
+          <label class="input-label">Fecha de inicio</label>
+          <input type="date" class="custom-input" formControlName="fecha_inicio" />
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">Fecha de fin</label>
+          <input type="date" class="custom-input" formControlName="fecha_fin" />
+        </div>
+      </fieldset>
+
+     <!-- 🔹 Detalles Dinámicos -->
+     <fieldset class="section">
+      <legend>Detalles de Productos por Grado</legend>
+
+      <table class="detalle-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th *ngFor="let grado of data.grados">{{ grado }}</th>
+            <th>Total</th>
+            <th>Unidad de Medida</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody formArrayName="productos">
+          <tr *ngFor="let producto of productos.controls; let i = index" [formGroupName]="i">
+
+            <!-- 🔹 Select Producto -->
+            <td>
+              <select class="custom-input" formControlName="producto">
+                <option value="" disabled selected>Seleccione un producto</option>
+                <option *ngFor="let prod of data.productos" [value]="prod.id">
+                  {{ prod.nombre }}
+                </option>
+              </select>
+            </td>
+
+            <!-- 🔹 Cantidades por Grado -->
+            <td *ngFor="let grado of data.grados; let j = index">
+              <input type="number" class="custom-input" formControlName="{{ 'cantidad_' + j }}" (input)="calcularTotal(i)" />
+            </td>
+
+            <!-- 🔹 Total por Producto -->
+            <td>
+              <input type="number" class="custom-input total-field" formControlName="total" readonly />
+            </td>
+
+            <!-- 🔹 Select Unidad de Medida -->
+            <td>
+              <label for="">Onzas</label>
+            </td>
+
+            <!-- 🔹 Acciones -->
+            <td>
+              <button mat-icon-button color="warn" (click)="eliminarFila(i)">
+                ❌
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 🔹 Botón para Agregar Producto -->
+      <div class="add-button-container">
+        <button mat-button color="primary" (click)="agregarFila()">➕ Agregar Producto</button>
+      </div>
+
+      <!-- 🔹 Total General -->
+      <div class="total-container">
+        <strong>Total General:</strong> {{ totalGeneral }}
+      </div>
+    </fieldset>
+
+
+
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button class="cancel-button" *ngIf="data.showCancelButton" (click)="cerrarModal()">
+    {{ data.cancelButtonText || 'Cancelar' }}
+  </button>
+
+  <button mat-button class="submit-button" color="primary" *ngIf="data.showActionButton" (click)="enviarFormulario()">
+    {{ data.actionButtonText || 'Guardar' }}
+  </button>
+</mat-dialog-actions>

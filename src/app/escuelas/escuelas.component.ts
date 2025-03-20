@@ -6,6 +6,7 @@ import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-escuelas',
@@ -23,7 +24,7 @@ export class EscuelasComponent implements OnInit {
   errorMessage = '';
   form!: FormGroup;
 
-  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService  ) {}
 
   ngOnInit() {
     this.obtenerEscuelas();
@@ -75,7 +76,12 @@ export class EscuelasComponent implements OnInit {
         cancelButtonText: 'Cancelar',
         showActionButton: true,
         actionButtonText: escuela ? 'Actualizar' : 'Guardar',
-        form: this.form
+        form: this.form,
+        fields: [
+          { label: 'Nombre', name: 'nombre', type: 'text', placeholder: 'Nombre de la escuela' },
+          { label: 'Nit', name: 'nit', type: 'number', placeholder: 'Nit' },
+          { label: 'Razón Social', name: 'razon_social', type: 'text', placeholder: 'Razón Social' },
+        ],
       }
     });
 
@@ -94,6 +100,7 @@ export class EscuelasComponent implements OnInit {
   agregarEscuela(nuevaEscuela: any) {
     this.apiService.crearEscuela(nuevaEscuela).subscribe({
       next: () => {
+        this.toast.success('Escuela agregada correctamente', 'Éxito');
         this.obtenerEscuelas();
       },
       error: (error) => {
@@ -106,6 +113,7 @@ export class EscuelasComponent implements OnInit {
   actualizarEscuela(id: string, escuela: any) {
     this.apiService.actualizarEscuela(id, escuela).subscribe({
       next: () => {
+        this.toast.success('Escuela actualizada correctamente', 'Éxito');
         this.obtenerEscuelas();
       },
       error: (error) => {
