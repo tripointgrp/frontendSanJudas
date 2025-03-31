@@ -1,0 +1,42 @@
+<div class="escuelas-container">
+  <h1>ESCUELAS</h1>
+
+  <div class="buscador-agregar-container">
+    <div class="buscador">
+      <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()" class="buscador-input" />
+      <span class="material-symbols-outlined buscador-icon">search</span>
+    </div>
+    <button class="submit-button" (click)="abrirModal()">Agregar grado</button>
+  </div>
+
+  <ngx-datatable
+    [rows]="filteredRows"
+    [columns]="[
+        { prop: 'nombre', name: 'Nombre', flexGrow: 5 },
+        { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 1 }
+    ]"
+    class="bootstrap force-table"
+    columnMode="force"
+    [headerHeight]="60"
+    [footerHeight]="50"
+    [scrollLeft]="true"
+    [rowHeight]="50"
+    [scrollbarV]="false"
+  >
+  </ngx-datatable>
+  <ng-template #gradeTpl let-row="row">
+    <button class="home-button" (click)="goGrade(row)">
+    <span class="material-symbols-outlined">history_edu</span>
+    <span class="badge">{{ row.cantidadGrados }}</span>
+    </button>
+  </ng-template>
+  <!-- Template para los iconos de acción -->
+  <ng-template #actionTpl let-row="row">
+      <!-- <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+          edit
+      </span> -->
+      <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
+          delete
+      </span>
+  </ng-template>
+</div>

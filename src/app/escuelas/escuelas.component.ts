@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-escuelas',
@@ -24,7 +25,7 @@ export class EscuelasComponent implements OnInit {
   errorMessage = '';
   form!: FormGroup;
 
-  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService  ) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService, private router : Router  ) {}
 
   ngOnInit() {
     this.obtenerEscuelas();
@@ -134,5 +135,10 @@ export class EscuelasComponent implements OnInit {
         }
       });
     }
+  }
+
+  goGrade(escuela: any) {
+    console.log('Ir a grados de la escuela:', escuela);
+    this.router.navigate([`/escuelas-grados/${escuela._id}`]);
   }
 }

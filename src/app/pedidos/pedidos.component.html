@@ -10,11 +10,12 @@
     </div>
 
     <ngx-datatable
-        [rows]="filteredRows"
+        [rows]="this.rows"
         [columns]="[
-            { prop: 'id_escuela', name: 'Escuela', flexGrow: 2 },
-            { prop: 'id_grado', name: 'Grado', flexGrow: 1 },
-            { prop: 'fecha_pedido', name: 'Fecha', flexGrow: 2 },
+            { prop: 'id_escuela.nombre', name: 'Escuela', flexGrow: 2 },
+            { prop: 'total', name: 'Total Productos', flexGrow: 2 },
+            { name: 'Desde', cellTemplate: fechaTpl, flexGrow: 2 },
+            { name: 'Hasta', cellTemplate: fechaFinTpl, flexGrow: 2 },
             { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
             { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
         ]"
@@ -26,6 +27,14 @@
         [scrollbarV]="false"
     >
     </ngx-datatable>
+    <ng-template #fechaTpl let-row="row">
+      {{ row.fecha_inicio | date: 'dd/MM/yyyy' }}
+    </ng-template>
+
+    <ng-template #fechaFinTpl let-row="row">
+      {{ row.fecha_fin | date: 'dd/MM/yyyy' }}
+    </ng-template>
+
 
     <!-- Template para el icono de detalle -->
     <ng-template #detalleTpl let-row="row">

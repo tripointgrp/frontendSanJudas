@@ -26,6 +26,8 @@ export class LoginComponent {
       (response) => {
         if (response.token) {
           this.authService.setToken(response.token);
+          this.authService.setUsuario(response.usuario.id);
+
           this.router.navigate(['/home']); // Redirigir si el login es exitoso
         }
         this.loading = false;

@@ -11,6 +11,7 @@ import { LoginGuard } from './guards/login.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { MantenimientosComponent } from './mantenimientos/mantenimientos.component';
 import { UsuariosComponent } from './usuarios/usuarios.component';
+import { EscuelasGradosComponent } from './escuelas/escuelas-grados/escuelas-grados.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' }, // 🔹 Redirige a login por defecto
@@ -23,6 +24,7 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'usuarios', component: UsuariosComponent },
       { path: 'escuelas', component: EscuelasComponent },
+      { path: 'escuelas-grados/:id', component: EscuelasGradosComponent },
       // { path: 'editar-escuelas/:id', component: EditarEscuelasComponent }, // 🔹 Ahora recibe un `id`
       { path: 'productos', component: ProductosComponent },
       { path: 'pedidos', component: PedidosComponent },

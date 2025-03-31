@@ -16,7 +16,7 @@ bootstrapApplication(AppComponent, {
       ToastrModule.forRoot(
         {
           timeOut:5000,
-          disableTimeOut:true,
+          disableTimeOut:false,
           positionClass:'toast-top-right',
           preventDuplicates:true,
           closeButton:true,

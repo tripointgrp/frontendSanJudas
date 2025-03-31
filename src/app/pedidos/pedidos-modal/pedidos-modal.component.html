@@ -1,0 +1,53 @@
+<h2 mat-dialog-title class="modal-title">📋 Detalle del Pedido</h2>
+
+<mat-dialog-content class="detalle-content">
+  <section class="info-pedido">
+    <div><strong>🏫 Escuela:</strong> {{ data.id_escuela?.nombre }}</div>
+    <div><strong>🔢 NIT:</strong> {{ data.id_escuela?.nit }}</div>
+    <div>
+      <strong>🏷️ Razón social:</strong> {{ data.id_escuela?.razon_social }}
+    </div>
+    <div><strong>🙍 Usuario:</strong> {{ data.id_usuario?.nombre }}</div>
+    <div><strong>📧 Correo:</strong> {{ data.id_usuario?.correo }}</div>
+    <div>
+      <strong>📅 Fecha de Inicio:</strong>
+      {{ data.fecha_inicio | date : "longDate" }}
+    </div>
+    <div>
+      <strong>📅 Fecha de Finalización:</strong>
+      {{ data.fecha_fin | date : "longDate" }}
+    </div>
+    <div><strong>📦 Total de Productos:</strong> {{ data.total }}</div>
+  </section>
+
+  <section class="dias-detalle mt-4">
+    <h4 class="mb-3">🗓️ Días del Pedido</h4>
+    <div *ngFor="let dia of data.dias" class="dia-card">
+      <div class="dia-fecha"><strong>📌 Fecha:</strong> {{ dia.fecha }}</div>
+      <table class="table table-sm table-bordered mt-2">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Grado</th>
+            <th>Cantidad</th>
+            <th>Unidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detalle of dia.detalles">
+            <td>{{ detalle.id_producto?.nombre }}</td>
+            <td>{{ detalle.id_grado?.id_grado?.nombre || "N/A" }}</td>
+            <td>{{ detalle.cantidad }}</td>
+            <td>{{ detalle.unidad_medida?.nombre }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close color="primary" class="btn-cerrar">
+    Cerrar
+  </button>
+</mat-dialog-actions>

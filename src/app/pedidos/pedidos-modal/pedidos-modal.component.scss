@@ -1,0 +1,48 @@
+.modal-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.detalle-content {
+  font-size: 0.95rem;
+  color: #333;
+
+  .info-pedido div {
+    margin-bottom: 0.5rem;
+  }
+
+  .dia-card {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.08);
+
+    .dia-fecha {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #2e86de;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      th {
+        background-color: #e8f0fe;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      td {
+        text-align: center;
+      }
+    }
+  }
+}
+
+.btn-cerrar {
+  font-weight: bold;
+}

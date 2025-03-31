@@ -8,6 +8,7 @@ export class AuthService {
   // private isAuthenticated = false; // Variable para controlar si el usuario está autenticado
   private TOKEN_KEY = 'authToken';
   private EXPIRATION_KEY = 'tokenExpiration';
+  private userToken = 'authUser';
 
 
   constructor(private router: Router) {}
@@ -25,6 +26,14 @@ export class AuthService {
   // Obtener el token
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  getUsuario(): string | null {
+    return localStorage.getItem(this.userToken);
+  }
+
+  setUsuario(usuario: string) {
+      localStorage.setItem(this.userToken, usuario);
   }
 
   // Obtener la fecha de expiración
