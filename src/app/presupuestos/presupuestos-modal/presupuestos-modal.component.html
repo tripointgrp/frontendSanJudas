@@ -1,0 +1,70 @@
+<h2 mat-dialog-title class="modal-title">📋 Detalle del Presupuesto</h2>
+
+<mat-dialog-content class="detalle-content">
+  <section class="info-pedido">
+    <div><strong>🏫 Escuela:</strong> {{ data.id_escuela?.nombre }}</div>
+    <div><strong>🔢 NIT:</strong> {{ data.id_escuela?.nit }}</div>
+    <div>
+      <strong>🏷️ Razón social:</strong> {{ data.id_escuela?.razon_social }}
+    </div>
+    <div><strong>🙍 Usuario:</strong> {{ data.id_usuario?.nombre }}</div>
+    <div><strong>📧 Correo:</strong> {{ data.id_usuario?.correo }}</div>
+    <div>
+      <strong>📅 Fecha de Inicio:</strong>
+      {{ data.fecha_inicio | date : "longDate" }}
+    </div>
+    <div>
+      <strong>📅 Fecha de Finalización:</strong>
+      {{ data.fecha_fin | date : "longDate" }}
+    </div>
+    <div><strong>📦 Total General:</strong> Q{{ data.total }}</div>
+  </section>
+
+  <section class="dias-detalle mt-4">
+    <h4 class="mb-3">🗓️ Días del Presupuesto</h4>
+    <div *ngFor="let dia of data.dias" class="dia-card mt-3">
+      <div class="dia-fecha"><strong>📌 Fecha:</strong> {{ dia.fecha }}</div>
+
+      <table class="table table-sm table-bordered mt-2">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Unidad</th>
+            <th *ngFor="let grado of getGradosUnicos(dia.detalles)">
+              {{ grado }}
+            </th>
+            <th>Precio Unitario</th>
+            <th>Total</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let prod of dia.productosAgrupados">
+            <td>{{ prod.producto }}</td>
+            <td>{{ prod.unidad }}</td>
+            <td *ngFor="let grado of getGradosUnicos(dia.detalles)">
+              {{ prod.grados?.[grado] || 0 }}
+            </td>
+            <td>Q{{ prod.precio_unitario }}</td>
+            <td>{{ prod.cantidad_total }}</td>
+            <td>Q{{ prod.subtotal }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="text-end mt-1">
+        <strong>💰 Total del Día:</strong> Q{{ dia.total_dia }}
+      </div>
+    </div>
+  </section>
+  <div class="text-end mt-3">
+    <h5><strong>🧾 Total de todos los días:</strong> Q{{ totalCalculado }}</h5>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close color="primary" class="btn-cerrar">
+    Cerrar
+  </button>
+</mat-dialog-actions>

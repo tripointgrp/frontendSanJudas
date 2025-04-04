@@ -1,47 +1,55 @@
-<div class="presupuestos-container">
-    <h1>PRESUPUESTOS</h1>
+<div class="pedidos-container">
+  <h1>Presupuestos</h1>
 
-    <div class="buscador-agregar-container">
-        <div class="buscador">
-            <input type="text" placeholder="Buscar presupuesto..." [(ngModel)]="searchTerm" (input)="filterPresupuestos()" class="buscador-input" />
-            <span class="material-symbols-outlined buscador-icon">search</span>
-        </div>
-        <button class="submit-button" (click)="abrirModal()">Agregar presupuesto</button>
-    </div>
+  <div class="buscador-agregar-container">
+      <div class="buscador">
+          <input type="text" placeholder="Buscar presupuesto..." [(ngModel)]="searchTerm" (input)="filterPedidos()" class="buscador-input" />
+          <span class="material-symbols-outlined buscador-icon">search</span>
+      </div>
+      <button class="submit-button" (click)="abrirModal()">Agregar Presupuesto</button>
+  </div>
 
-    <ngx-datatable
-        [rows]="filteredRows"
-        [columns]="[
-            { prop: 'envio', name: 'Número de Envío', flexGrow: 1 },
-            { prop: 'id_escuela', name: 'Escuela', flexGrow: 2 },
-            { prop: 'fecha', name: 'Fecha', flexGrow: 2 },
-            { prop: 'monto_total', name: 'Monto Total', flexGrow: 1 },
-            { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
-            { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
-        ]"
-        class="bootstrap force-table"
-        columnMode="flex"
-        [headerHeight]="60"
-        [footerHeight]="50"
-        [rowHeight]="50"
-        [scrollbarV]="false"
-    >
-    </ngx-datatable>
+  <ngx-datatable
+      [rows]="this.rows"
+      [columns]="[
+          { prop: 'id_escuela.nombre', name: 'Escuela', flexGrow: 2 },
+          { prop: 'total', name: 'Total Productos', flexGrow: 2 },
+          { name: 'Desde', cellTemplate: fechaTpl, flexGrow: 2 },
+          { name: 'Hasta', cellTemplate: fechaFinTpl, flexGrow: 2 },
+          { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
+          { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
+      ]"
+      class="bootstrap force-table"
+      columnMode="force"
+      [headerHeight]="60"
+      [footerHeight]="50"
+      [rowHeight]="50"
+      [scrollbarV]="false"
+  >
+  </ngx-datatable>
+  <ng-template #fechaTpl let-row="row">
+    {{ row.fecha_inicio | date: 'dd/MM/yyyy' }}
+  </ng-template>
 
-    <!-- Template para el icono de detalle -->
-    <ng-template #detalleTpl let-row="row">
-        <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
-            visibility
-        </span>
-    </ng-template>
+  <ng-template #fechaFinTpl let-row="row">
+    {{ row.fecha_fin | date: 'dd/MM/yyyy' }}
+  </ng-template>
 
-    <!-- Template para los iconos de acción -->
-    <ng-template #actionTpl let-row="row">
-        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
-            edit
-        </span>
-        <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPresupuesto(row)">
-            delete
-        </span>
-    </ng-template>
+
+  <!-- Template para el icono de detalle -->
+  <ng-template #detalleTpl let-row="row">
+      <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
+          visibility
+      </span>
+  </ng-template>
+
+  <!-- Template para los iconos de acción -->
+  <ng-template #actionTpl let-row="row">
+      <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+          edit
+      </span>
+      <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPedido(row)">
+          delete
+      </span>
+  </ng-template>
 </div>

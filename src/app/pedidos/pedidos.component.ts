@@ -161,6 +161,10 @@ export class PedidosComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         console.log('Pedido guardado:', result);
+        if (result) {
+          // Actualizar pedido existente
+          this.obtenerPedidos();
+        }
       }
     });
   }

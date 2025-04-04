@@ -18,6 +18,8 @@ export class ApiService {
   unidadm: string = 'api/unidades_medida/';
   escuelas_grados: string = 'api/escuelas_grados/';
   grados: string = 'api/grados/';
+  presupuestos: string = 'api/presupuestos-real/';
+
   constructor(private http: HttpClient) {}
 
   //  Obtener todos los datos desde el backend
@@ -158,6 +160,11 @@ export class ApiService {
     return this.http.post<any>(`${this.apiUrl}${this.pedidosUnificados}crear-pedido-semanal`, pedido);
   }
 
+    //  Crear un nuevo pedido
+    crearPresupuestoSemanal(pedido: any): Observable<any> {
+      return this.http.post<any>(`${this.apiUrl}${this.presupuestos}crear-presupuesto-semanal`, pedido);
+    }
+
   //  Actualizar un pedido
   actualizarPedido(id: string, pedido: any): Observable<any> {
     return this.http.put<any>(
@@ -173,6 +180,12 @@ export class ApiService {
 
   // CRUD PRESUPUESTOS ----------------------------------------------------------------------
   //  PRESUPUESTOS: CRUD API
+
+  obtenerPresupuestosSemanal(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}${this.presupuestos}todos-completo`);
+  }
+
+
   obtenerPresupuestos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}api/presupuestos/obtener`);
   }

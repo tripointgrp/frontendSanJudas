@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { ToastrService } from 'ngx-toastr';
+import { PresupuestosModalComponent } from './presupuestos-modal/presupuestos-modal.component';
+import { ModaDialogPresupuestosComponent } from '../components/moda-dialog-presupuestos/moda-dialog-presupuestos.component';
+
 
 @Component({
   selector: 'app-presupuestos',
@@ -16,136 +19,195 @@ import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.co
 })
 export class PresupuestosComponent implements OnInit {
   title = 'Presupuestos';
-  searchTerm = '';
-  rows: any[] = [];
-  filteredRows: any[] = [];
-  loading = true;
-  errorMessage = '';
-  form!: FormGroup;
+    searchTerm = '';
+    rows: any[] = [];
+    rowsEscuelas: any[] = [];
+    rowsProductos: any[] = [];
+    filteredRows: any[] = [];
+    grados: { id: any; nombre: any }[] = [];
+    loading = true;
+    errorMessage = '';
+    form!: FormGroup;
+    constructor(
+      private apiService: ApiService,
+      private dialog: MatDialog,
+      private fb: FormBuilder,
+      private toastr: ToastrService
+    ) {}
 
-  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
+    ngOnInit() {
+      this.obtenerPedidos();
+      this.obtenerEscuelas();
+      this.obtenerProductos();
+    }
 
-  ngOnInit() {
-    this.obtenerPresupuestos();
-  }
-
-  // 🔹 Obtener Presupuestos desde la API
-  obtenerPresupuestos() {
-    this.apiService.obtenerPresupuestos().subscribe({
-      next: (data) => {
-        console.log('Presupuestos obtenidos:', data);
-        this.rows = data;
-        this.filteredRows = [...data];
-        this.loading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Error al obtener los presupuestos';
-        console.error('Error en la consulta:', error);
-        this.loading = false;
-      }
-    });
-  }
-
-  // 🔹 Filtrar Presupuestos en la Tabla
-  filterPresupuestos() {
-    const term = this.searchTerm?.toLowerCase() ?? '';
-    this.filteredRows = this.rows.filter(presupuesto =>
-      (presupuesto.envio?.toLowerCase() ?? '').includes(term) ||
-      (presupuesto.escuela?.toLowerCase() ?? '').includes(term) ||
-      (presupuesto.fecha?.includes(term) ?? false)
-    );
-  }
-
-  // 🔹 Ver Detalle del Presupuesto
-  verDetalle(presupuesto: any): void {
-    this.dialog.open(ModalDialogComponent, {
-      width: '726px',
-      disableClose: false,
-      data: {
-        title: 'Detalle del Presupuesto',
-        message: `
-          <b>Envío:</b> ${presupuesto.envio}<br>
-          <b>Escuela:</b> ${presupuesto.escuela}<br>
-          <b>Fecha:</b> ${presupuesto.fecha}<br>
-          <b>Monto Total:</b> Q${presupuesto.monto_total}
-        `,
-        showCancelButton: true,
-        cancelButtonText: 'Cerrar',
-        showActionButton: false
-      }
-    });
-  }
-
-  // 🔹 Abrir Modal para Agregar o Editar Presupuesto
-  abrirModal(presupuesto: any = null): void {
-    this.form = this.fb.group({
-      envio: [presupuesto?.envio || '', Validators.required],
-      escuela: [presupuesto?.escuela || '', Validators.required],
-      fecha: [presupuesto?.fecha || '', Validators.required],
-      monto_total: [presupuesto?.monto_total || '', Validators.required]
-    });
-
-    const dialogRef = this.dialog.open(ModalDialogComponent, {
-      width: '726px',
-      disableClose: false,
-      data: {
-        title: presupuesto ? 'Editar Presupuesto' : 'Agregar Presupuesto',
-        columns: 1,
-        message: 'Ingrese los datos del presupuesto',
-        showCancelButton: true,
-        cancelButtonText: 'Cancelar',
-        showActionButton: true,
-        actionButtonText: presupuesto ? 'Actualizar' : 'Guardar',
-        form: this.form
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        if (presupuesto) {
-          this.actualizarPresupuesto(presupuesto._id, result);
-        } else {
-          this.agregarPresupuesto(result);
-        }
-      }
-    });
-  }
-
-  // 🔹 Agregar Presupuesto
-  agregarPresupuesto(nuevoPresupuesto: any) {
-    this.apiService.crearPresupuesto(nuevoPresupuesto).subscribe({
-      next: () => {
-        this.obtenerPresupuestos();
-      },
-      error: (error) => {
-        console.error('Error al agregar presupuesto:', error);
-      }
-    });
-  }
-
-  // 🔹 Actualizar Presupuesto
-  actualizarPresupuesto(id: string, presupuesto: any) {
-    this.apiService.actualizarPresupuesto(id, presupuesto).subscribe({
-      next: () => {
-        this.obtenerPresupuestos();
-      },
-      error: (error) => {
-        console.error('Error al actualizar presupuesto:', error);
-      }
-    });
-  }
-
-  // 🔹 Eliminar Presupuesto
-  eliminarPresupuesto(presupuesto: any) {
-    if (confirm(`¿Seguro que deseas eliminar el presupuesto de "${presupuesto.escuela}"?`)) {
-      this.apiService.eliminarPresupuesto(presupuesto._id).subscribe({
-        next: () => {
-          this.obtenerPresupuestos();
+    // 🔹 Obtener pedidos desde la API
+    obtenerPedidos() {
+      this.apiService.obtenerPresupuestosSemanal().subscribe({
+        next: (data) => {
+          console.log('Pedidos obtenidos:', data);
+          this.rows = data;
+          this.filteredRows = [...data];
+          this.loading = false;
         },
         error: (error) => {
-          console.error('Error al eliminar presupuesto:', error);
+          this.errorMessage = 'Error al obtener los pedidos';
+          console.error('Error en la consulta:', error);
+          this.loading = false;
+        },
+      });
+    }
+
+    obtenerProductos() {
+      this.apiService.obtenerProductos().subscribe({
+        next: (data) => {
+          console.log('Productos obtenidos:', data);
+          this.rowsProductos = data;
+          console.log(this.rowsProductos);
+        },
+        error: (error) => {
+          this.errorMessage = 'Error al obtener los pedidos';
+          console.error('Error en la consulta:', error);
+          this.loading = false;
+        },
+      });
+    }
+
+    getGrados(idEscuela: string = ''): Promise<{ id: any; nombre: any }[]> {
+      console.log('ID Escuela:', idEscuela);
+
+      return new Promise((resolve, reject) => {
+        this.apiService.obtenerGradoEscuela(idEscuela).subscribe({
+          next: (data) => {
+              const grados = Array.isArray(data.grados)
+              ? data.grados.map((grado: any) => ({
+                id: grado.id,
+                nombre: grado.nombre,
+                }))
+              : [];
+
+            resolve(grados); // ✅ devolvemos los grados ya cargados
+          },
+          error: (error) => {
+            console.error('Error al obtener grados:', error);
+            this.toastr.error('Error al obtener grados', 'Error');
+            reject(error); // ❌ en caso de error
+          },
+        });
+      });
+    }
+
+
+    // 🔹 Filtrar pedidos en la tabla
+    filterPedidos() {
+      const term = this.searchTerm?.toLowerCase() ?? '';
+      this.filteredRows = this.rows.filter(
+        (pedido) =>
+          (pedido.escuela?.toLowerCase() ?? '').includes(term) ||
+          (pedido.grado?.toLowerCase() ?? '').includes(term) ||
+          (pedido.fecha_pedido ?? '').includes(term)
+      );
+    }
+
+    // 🔹 Ver detalles de un pedido
+    verDetalle(pedido: any): void {
+      console.log('Detalles del pedido:', pedido);
+      this.dialog.open(PresupuestosModalComponent, {
+        width: '90vw', // ✅ 90% del ancho de la ventana
+        maxWidth: '95vw', // 🔹 Para asegurarte de que no lo restrinja el maxWidth default
+        panelClass: 'wide-modal', // Opcional: aplicar estilos adicionales
+        data: pedido,
+      });
+
+
+    }
+
+
+    obtenerEscuelas() {
+      this.apiService.obtenerEscuelas().subscribe({
+        next: (data) => {
+          console.log('Escuelas obtenidas:', data);
+          this.rowsEscuelas = data;
+        },
+        error: (error) => {
+          this.errorMessage = 'Error al obtener las escuelas';
+          console.error('Error en la consulta:', error);
+        },
+      });
+    }
+
+    abrirModal(pedido: any = null): void {
+      console.log('antes de entrar', this.rowsProductos)
+      const dialogRef = this.dialog.open(ModaDialogPresupuestosComponent, {
+        maxWidth: 'none', // 🔹 Permite que el diálogo tome el tamaño definido en width
+        width: '80vh', // 🔹 El 90% del ancho de la ventana
+        height: '90vh', // 🔹 El 80% del alto de la ventana
+        disableClose: false,
+        data: {
+          title: pedido ? 'Editar Presupuesto' : 'Agregar Presupuesto',
+          message: 'Ingrese los datos del presupuesto',
+          showCancelButton: true,
+          columns: 2,
+          cancelButtonText: 'Cancelar',
+          showActionButton: true,
+          actionButtonText: pedido ? 'Actualizar' : 'Guardar',
+          escuelas: this.rowsEscuelas,
+          productos: this.rowsProductos,
+          buscarGradosPorEscuela: (idEscuela: string) => this.getGrados(idEscuela),
+          grados: ['Grado 1', 'Grado 2', 'Grado 3'], // Simulación de grados
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          console.log('Pedido guardado:', result);
+          if (pedido) {
+            // Actualizar pedido existente
+            this.obtenerPedidos();
+          }
         }
       });
     }
-  }
+
+    // 🔹 Agregar un nuevo pedido a la API
+    agregarPedido(nuevoPedido: any) {
+      this.apiService.crearPedido(nuevoPedido).subscribe({
+        next: () => {
+          this.obtenerPedidos();
+        },
+        error: (error) => {
+          console.error('Error al agregar pedido:', error);
+        },
+      });
+    }
+
+    // 🔹 Actualizar un pedido en la API
+    actualizarPedido(id: string, pedido: any) {
+      this.apiService.actualizarPedido(id, pedido).subscribe({
+        next: () => {
+          this.obtenerPedidos();
+        },
+        error: (error) => {
+          console.error('Error al actualizar pedido:', error);
+        },
+      });
+    }
+
+    // 🔹 Eliminar un pedido de la API
+    eliminarPedido(pedido: any) {
+      if (
+        confirm(
+          `¿Seguro que deseas eliminar el pedido de la escuela "${pedido.escuela}"?`
+        )
+      ) {
+        this.apiService.eliminarPedido(pedido._id).subscribe({
+          next: () => {
+            this.obtenerPedidos();
+          },
+          error: (error) => {
+            console.error('Error al eliminar pedido:', error);
+          },
+        });
+      }
+    }
 }
