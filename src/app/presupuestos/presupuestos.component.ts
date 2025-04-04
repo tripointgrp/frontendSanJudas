@@ -213,60 +213,78 @@ export class PresupuestosComponent implements OnInit {
         });
       }
     }
-    generarPDF(presupuesto: any): void {
-      console.log('Se disparó generarPDF:', presupuesto);
-    
-      if (!presupuesto || !Array.isArray(presupuesto.dias)) {
-        console.error('Presupuesto inválido o sin días');
-        return;
-      }
-    
+
+
+
+    generarPDF(row: any): void {
+      // Asegúrate de que los datos del row están bien definidos
+      const escuela = row.id_escuela ? row.id_escuela.nombre : 'N/A';
+      const nit = row.id_escuela ? row.id_escuela.nit : 'N/A';
+      const razonSocial = row.id_escuela ? row.id_escuela.razon_social : 'N/A';
+      const fechaInicio = new Date(row.fecha_inicio).toLocaleDateString();
+      const fechaFin = new Date(row.fecha_fin).toLocaleDateString();
+      const usuario = row.id_usuario ? row.id_usuario.nombre : 'N/A';
+      const correoUsuario = row.id_usuario ? row.id_usuario.correo : 'N/A';
+      const totalPresupuesto = row.total.toFixed(2);
+
+      const diasContent = row.dias.map((dia: any) => {
+        // Extraer los detalles de productos por día
+        const productos = dia.detalles || [];
+
+        return {
+          text: `📌 Fecha: ${dia.fecha}`,
+          style: 'fechaDia',
+          table: {
+            headerRows: 1,
+            widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+            body: [
+              ['Producto', 'Cantidad', 'Unidad', 'Precio Unitario', 'Subtotal'],
+              ...productos.map((producto: any) => [
+                producto.id_producto?.nombre || 'N/A', // Nombre del producto
+                producto.cantidad_comprada || '0',     // Cantidad comprada
+                producto.unidad_medida?.nombre || 'N/A', // Unidad de medida
+                producto.precio_unitario || '0',       // Precio unitario
+                producto.subtotal || '0',              // Subtotal
+              ])
+            ]
+          },
+          layout: 'lightHorizontalLines',
+          margin: [0, 0, 0, 10]
+        };
+      });
+
+      // Definición del contenido del PDF
       const docDefinition = {
         content: [
           { text: '📋 Detalle del Presupuesto', style: 'header' },
           {
             margin: [0, 10],
             ul: [
-              `Escuela: ${presupuesto.id_escuela?.nombre}`,
-              `NIT: ${presupuesto.id_escuela?.nit}`,
-              `Razón social: ${presupuesto.id_escuela?.razon_social}`,
-              `Usuario: ${presupuesto.id_usuario?.nombre}`,
-              `Correo: ${presupuesto.id_usuario?.correo}`,
-              `Fecha de Inicio: ${new Date(presupuesto.fecha_inicio).toLocaleDateString()}`,
-              `Fecha de Finalización: ${new Date(presupuesto.fecha_fin).toLocaleDateString()}`,
-              `Total de Productos: ${presupuesto.total}`
+              `Escuela: ${escuela}`,
+              `NIT: ${nit}`,
+              `Razón social: ${razonSocial}`,
+              `Usuario: ${usuario}`,
+              `Correo: ${correoUsuario}`,
+              `Fecha de Inicio: ${fechaInicio}`,
+              `Fecha de Finalización: ${fechaFin}`,
+              `Total del Presupuesto: ${totalPresupuesto}`
             ]
           },
           { text: '📅 Días del Presupuesto', style: 'subheader' },
-          ...presupuesto.dias.map((dia: any) => [
-            { text: `📌 Fecha: ${dia.fecha}`, style: 'fechaDia' },
-            {
-              table: {
-                headerRows: 1,
-                widths: ['*', '*', 'auto', 'auto'],
-                body: [
-                  ['Producto', 'Grado', 'Cantidad', 'Unidad'],
-                  ...dia.detalles.map((detalle: any) => [
-                    detalle.id_producto?.nombre || 'N/A',
-                    detalle.id_grado?.id_grado?.nombre || 'N/A',
-                    detalle.cantidad,
-                    detalle.unidad_medida?.nombre || 'N/A'
-                  ])
-                ]
-              },
-              layout: 'lightHorizontalLines',
-              margin: [0, 0, 0, 10]
-            }
-          ]).flat()
+          ...diasContent  // Añadir los días con los productos
         ],
         styles: {
           header: { fontSize: 18, bold: true, color: '#1A20B6' },
-          subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 0], color: '#1D24CA' },
-          fechaDia: { bold: true, color: '#D91E36', margin: [0, 10, 0, 5] }
+          subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 0] as [number, number, number, number], color: '#1D24CA' },
+          fechaDia: { bold: true, color: '#000000', margin: [0, 10, 0, 5] as [number, number, number, number] }  // Cambiado a color negro
         }
       };
-    
-      pdfMake.createPdf(docDefinition as any).download('detalle-presupuesto.pdf');
+
+      // Crear y descargar el PDF
+      pdfMake.createPdf(docDefinition).download('detalle-presupuesto.pdf');
     }
-    
+
+
+
+
 }
