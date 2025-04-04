@@ -1,0 +1,67 @@
+.reportes-container {
+    padding: 20px;
+    border-radius: 20px;
+    min-height: 100vh;
+    background-color: #F5F5F5;
+    color: #1D24CA;
+    font-family: "Raleway", serif;
+  
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #1A20B6;
+      text-align: center;
+    }
+  
+    .filtros {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+  
+      label {
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #1D24CA;
+      }
+  
+      input,
+      select,
+      ng-select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 8px;
+        background-color: #dddddd;
+        border: none;
+        font-size: 0.9rem;
+        color: #1D24CA;
+      }
+    }
+  
+    table {
+      width: 100%;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-collapse: collapse;
+      text-align: center;
+  
+      th {
+        background-color: #1D24CA;
+        color: #F5F5F5;
+        padding: 10px;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #D9A54A;
+      }
+  
+      td {
+        padding: 12px;
+        font-size: 0.9rem;
+        color: #1D24CA;
+        border-top: 1px solid #ddd;
+      }
+    }
+  }
+  

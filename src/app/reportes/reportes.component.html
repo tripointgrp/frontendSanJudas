@@ -1,1 +1,43 @@
-<p>reportes works!</p>
+<div class="reportes-container">
+    <h1>Reportes</h1>
+  
+    <div class="filtros">
+      <div>
+        <label>Fecha Inicio</label>
+        <input type="date" />
+      </div>
+      <div>
+        <label>Fecha Fin</label>
+        <input type="date" />
+      </div>
+      <div>
+        <label>Tipo de Reporte</label>
+        <select>
+          <option value="">Selecciona</option>
+          <option value="ventas">Ventas</option>
+          <option value="inventario">Inventario</option>
+          <option value="usuarios">Usuarios</option>
+        </select>
+      </div>
+    </div>
+  
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let reporte of reportes">
+          <td>{{ reporte.fecha }}</td>
+          <td>{{ reporte.tipo }}</td>
+          <td>{{ reporte.descripcion }}</td>
+          <td>{{ reporte.total | currency }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

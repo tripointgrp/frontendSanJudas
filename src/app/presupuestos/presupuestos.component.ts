@@ -8,8 +8,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PresupuestosModalComponent } from './presupuestos-modal/presupuestos-modal.component';
 import { ModaDialogPresupuestosComponent } from '../components/moda-dialog-presupuestos/moda-dialog-presupuestos.component';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
-
+// ✅ Asignar fuentes virtuales correctamente
+(pdfMake as any).vfs = pdfFonts.vfs;
 @Component({
   selector: 'app-presupuestos',
   standalone: true,
@@ -210,4 +213,60 @@ export class PresupuestosComponent implements OnInit {
         });
       }
     }
+    generarPDF(presupuesto: any): void {
+      console.log('Se disparó generarPDF:', presupuesto);
+    
+      if (!presupuesto || !Array.isArray(presupuesto.dias)) {
+        console.error('Presupuesto inválido o sin días');
+        return;
+      }
+    
+      const docDefinition = {
+        content: [
+          { text: '📋 Detalle del Presupuesto', style: 'header' },
+          {
+            margin: [0, 10],
+            ul: [
+              `Escuela: ${presupuesto.id_escuela?.nombre}`,
+              `NIT: ${presupuesto.id_escuela?.nit}`,
+              `Razón social: ${presupuesto.id_escuela?.razon_social}`,
+              `Usuario: ${presupuesto.id_usuario?.nombre}`,
+              `Correo: ${presupuesto.id_usuario?.correo}`,
+              `Fecha de Inicio: ${new Date(presupuesto.fecha_inicio).toLocaleDateString()}`,
+              `Fecha de Finalización: ${new Date(presupuesto.fecha_fin).toLocaleDateString()}`,
+              `Total de Productos: ${presupuesto.total}`
+            ]
+          },
+          { text: '📅 Días del Presupuesto', style: 'subheader' },
+          ...presupuesto.dias.map((dia: any) => [
+            { text: `📌 Fecha: ${dia.fecha}`, style: 'fechaDia' },
+            {
+              table: {
+                headerRows: 1,
+                widths: ['*', '*', 'auto', 'auto'],
+                body: [
+                  ['Producto', 'Grado', 'Cantidad', 'Unidad'],
+                  ...dia.detalles.map((detalle: any) => [
+                    detalle.id_producto?.nombre || 'N/A',
+                    detalle.id_grado?.id_grado?.nombre || 'N/A',
+                    detalle.cantidad,
+                    detalle.unidad_medida?.nombre || 'N/A'
+                  ])
+                ]
+              },
+              layout: 'lightHorizontalLines',
+              margin: [0, 0, 0, 10]
+            }
+          ]).flat()
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true, color: '#1A20B6' },
+          subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 0], color: '#1D24CA' },
+          fechaDia: { bold: true, color: '#D91E36', margin: [0, 10, 0, 5] }
+        }
+      };
+    
+      pdfMake.createPdf(docDefinition as any).download('detalle-presupuesto.pdf');
+    }
+    
 }

@@ -10,6 +10,16 @@ import { ModalDialogPedidoComponent } from '../components/modal-dialog-pedido/mo
 import { ToastrService } from 'ngx-toastr';
 import { PedidosModalComponent } from './pedidos-modal/pedidos-modal.component';
 
+// ✅ Importar pdfMake y fuentes de forma compatible con Vite
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+// ✅ Asignar fuentes virtuales correctamente
+(pdfMake as any).vfs = pdfFonts.vfs;
+
+
+
+
 @Component({
   selector: 'app-pedidos',
   standalone: true,
@@ -210,4 +220,65 @@ export class PedidosComponent implements OnInit {
       });
     }
   }
+  // 🔹 Función para generar PDF de un pedido
+  generarPDF(pedido: any): void {
+    console.log('Se disparó generarPDF:', pedido); // 🔍 Verifica si esto aparece
+
+  if (!pedido || !Array.isArray(pedido.dias)) {
+    console.error('Pedido inválido o sin días');
+    return;
+  }
+  
+    const docDefinition = {
+      content: [
+        { text: 'Detalle del Pedido', style: 'header' },
+        {
+          margin: [0, 10],
+          ul: [
+            `Escuela: ${pedido.id_escuela?.nombre}`,
+            `NIT: ${pedido.id_escuela?.nit}`,
+            `Razón social: ${pedido.id_escuela?.razon_social}`,
+            `Usuario: ${pedido.id_usuario?.nombre}`,
+            `Correo: ${pedido.id_usuario?.correo}`,
+            `Fecha de Inicio: ${new Date(pedido.fecha_inicio).toLocaleDateString()}`,
+            `Fecha de Finalización: ${new Date(pedido.fecha_fin).toLocaleDateString()}`,
+            `Total de Productos: ${pedido.total}`
+          ]
+        },
+        { text: 'Días del Pedido:', style: 'subheader' },
+        ...pedido.dias.map((dia: any) => [
+          { text: `Fecha: ${dia.fecha}`, style: 'fechaDia' },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', '*', 'auto', 'auto'],
+              body: [
+                ['Producto', 'Grado', 'Cantidad', 'Unidad'],
+                ...dia.detalles.map((detalle: any) => [
+                  detalle.id_producto?.nombre || 'N/A',
+                  detalle.id_grado?.id_grado?.nombre || 'N/A',
+                  detalle.cantidad,
+                  detalle.unidad_medida?.nombre || 'N/A'
+                ])
+              ]
+            },
+            layout: 'lightHorizontalLines',
+            margin: [0, 0, 0, 10]
+          }
+        ]).flat()
+      ],
+      styles: {
+        header: { fontSize: 18, bold: true, color: '#1A20B6' },
+        subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 0], color: '#1D24CA' },
+        fechaDia: { bold: true, color: '#D91E36', margin: [0, 10, 0, 5] }
+      }      
+      
+    };
+  
+    pdfMake.createPdf(docDefinition as any).download('Pedido.pdf');
+
+
+  }
+  
+
 }
