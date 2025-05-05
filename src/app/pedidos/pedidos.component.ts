@@ -38,6 +38,9 @@ export class PedidosComponent implements OnInit {
   loading = true;
   errorMessage = '';
   form!: FormGroup;
+  fechaInicio: Date | null = null;
+  fechaFin: Date | null = null;
+  isSwitchOn = false
   constructor(
     private apiService: ApiService,
     private dialog: MatDialog,
@@ -49,6 +52,28 @@ export class PedidosComponent implements OnInit {
     this.obtenerPedidos();
     this.obtenerEscuelas();
     this.obtenerProductos();
+  }
+
+  descargarProductos() {
+    console.log('Descargando productos...');
+    console.log(this.fechaInicio, this.fechaFin);
+    if(this.fechaInicio && this.fechaFin) {
+      console.log('Fechas válidas:', this.fechaInicio, this.fechaFin);
+      // this.apiService
+      //   .descargarProductos(this.fechaInicio, this.fechaFin)
+      //   .subscribe((data) => {
+      //     console.log('Datos descargados:', data);
+      //     // Aquí puedes manejar la descarga del archivo o lo que necesites hacer con los datos
+      //   });
+    }else {
+      this.toastr.error('Por favor selecciona fechas válidas', 'Error');
+    }
+  }
+
+  toggleSwitch() {
+    console.log('Switch activado/desactivado:', this.isSwitchOn);
+    // this.isSwitchOn = !this.isSwitchOn; // Cambia el estado del switch
+    console.log('Estado del switch:', this.isSwitchOn);
   }
 
   // 🔹 Obtener pedidos desde la API
@@ -228,7 +253,7 @@ export class PedidosComponent implements OnInit {
     console.error('Pedido inválido o sin días');
     return;
   }
-  
+
     const docDefinition = {
       content: [
         { text: 'Detalle del Pedido', style: 'header' },
@@ -271,14 +296,14 @@ export class PedidosComponent implements OnInit {
         header: { fontSize: 18, bold: true, color: '#1A20B6' },
         subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 0], color: '#1D24CA' },
         fechaDia: { bold: true, color: '#D91E36', margin: [0, 10, 0, 5] }
-      }      
-      
+      }
+
     };
-  
+
     pdfMake.createPdf(docDefinition as any).download('Pedido.pdf');
 
 
   }
-  
+
 
 }

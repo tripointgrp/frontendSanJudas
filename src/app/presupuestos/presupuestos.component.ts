@@ -253,6 +253,8 @@ export class PresupuestosComponent implements OnInit {
         };
       });
 
+
+
       // Definición del contenido del PDF
       const docDefinition = {
         content: [

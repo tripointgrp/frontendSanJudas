@@ -6,7 +6,9 @@
           <input type="text" placeholder="Buscar presupuesto..." [(ngModel)]="searchTerm" (input)="filterPedidos()" class="buscador-input" />
           <span class="material-symbols-outlined buscador-icon">search</span>
       </div>
-      <button class="submit-button" (click)="abrirModal()">Agregar Presupuesto</button>
+      <div class="button-container">
+          <button class="submit-button" (click)="abrirModal()">Agregar Presupuesto</button>
+      </div>
   </div>
 
   <ngx-datatable

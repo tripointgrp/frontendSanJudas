@@ -8,6 +8,29 @@
         </div>
         <button class="submit-button" (click)="abrirModal()">Agregar pedido</button>
     </div>
+    <div class="m-2">
+      <div class="switch-container">
+        <span>Resumen por fechas</span>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="isSwitchOn" (change)="toggleSwitch()" />
+          <span class="slider"></span>
+        </label>
+        <span class="switch-label">{{ isSwitchOn ? 'Activado' : 'Desactivado' }}</span>
+      </div>
+
+      <div *ngIf="isSwitchOn" class="fecha-descargar-container-compacto">
+        <div class="fecha-inputs-compacto">
+          <input type="date" [(ngModel)]="fechaInicio" class="fecha-input-compacto" />
+          <span class="guion">–</span>
+          <input type="date" [(ngModel)]="fechaFin" class="fecha-input-compacto" />
+          <button class="descargar-button-compacto" (click)="descargarProductos()">
+            Descargar
+          </button>
+        </div>
+      </div>
+    </div>
+
+
 
     <ngx-datatable
         [rows]="this.rows"
@@ -41,7 +64,7 @@
         <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
             visibility
         </span>
-      
+
           <span (click)="generarPDF(row)" class="material-symbols-outlined span-picture_as_pdf">
             picture_as_pdf
             </span>
@@ -53,12 +76,12 @@
         <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
             edit
         </span>
-          
+
         <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPedido(row)">
             delete
         </span>
 
-      
-          
+
+
     </ng-template>
 </div>

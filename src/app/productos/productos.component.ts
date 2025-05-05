@@ -208,6 +208,11 @@ export class ProductosComponent {
   }
 
 
+  downloadPrices(item:any){
+    console.log(item)
+  }
+
+
   abrirModal(): void {
     this.form = this.fb.group({
       nombre: ['', Validators.required],

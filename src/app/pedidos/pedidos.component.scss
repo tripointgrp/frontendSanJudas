@@ -96,3 +96,120 @@
         pointer-events: none;
     }
 }
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: Arial, sans-serif;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* El fondo del slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+/* El círculo del slider */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* Cuando está activado */
+input:checked + .slider {
+  background-color: #4CAF50; /* Verde bonito */
+}
+
+/* Mover el círculo a la derecha */
+input:checked + .slider::before {
+  transform: translateX(24px);
+}
+
+/* Texto de Activado/Desactivado */
+.switch-label {
+  font-weight: bold;
+  color: #333;
+}
+.fecha-descargar-container-compacto {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  margin-top: 16px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.fecha-inputs-compacto {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fecha-input-compacto {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 140px;
+  height: 36px;
+  transition: border-color 0.3s;
+}
+
+.fecha-input-compacto:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+.guion {
+  font-size: 20px;
+  color: #999;
+}
+
+.descargar-button-compacto {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  height: 36px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.descargar-button-compacto:hover {
+  background-color: #45a049;
+}
+
