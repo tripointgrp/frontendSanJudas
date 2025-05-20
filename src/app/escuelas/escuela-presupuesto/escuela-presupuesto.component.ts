@@ -12,14 +12,14 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-escuelas-grados',
+  selector: 'app-escuela-presupuesto',
   standalone: true,
   imports: [CommonModule, NgxDatatableModule, FormsModule],
-  templateUrl: './escuelas-grados.component.html',
-  styleUrl: './escuelas-grados.component.scss',
+  templateUrl: './escuela-presupuesto.component.html',
+  styleUrl: './escuela-presupuesto.component.scss'
 })
-export class EscuelasGradosComponent {
-  title = 'Escuelas';
+export class EscuelaPresupuestoComponent {
+title = 'Presupuesto por mes';
   searchTerm = '';
   rows: any[] = [];
   filteredRows: any[] = [];
@@ -46,16 +46,17 @@ export class EscuelasGradosComponent {
     this.escuela = escuelaId?.toString() || '';
     this.obtenerEscuelas(escuelaId);
     this.obtenerGrados();
-     this.dataInfo = this.authService.getUserData()?.tipo_usuario
+
+    this.dataInfo = this.authService.getUserData()?.tipo_usuario;
   }
 
   // 🔹 Obtener escuelas desde la API
   obtenerEscuelas(_id : any) {
-    this.apiService.obtenerGradoEscuela(_id).subscribe({
+    this.apiService.getPresupuestosEscuelas(_id).subscribe({
       next: (data) => {
-        console.log('Escuelas obtenidas:', data.grados);
-        this.rows = data.grados;
-        this.filteredRows = [...data.grados];
+        console.log('Escuelas obtenidas:', data.presupuestos);
+        this.rows = data.presupuestos;
+        this.filteredRows = [...data.presupuestos];
         this.loading = false;
       },
       error: (error) => {
@@ -94,16 +95,40 @@ export class EscuelasGradosComponent {
     console.log('Escuela:', escuela);
     this.form = this.fb.group({
       id_escuela: [this.escuela || '', Validators.required],
-      id_grado: [escuela?.id_grado || 0, Validators.required],
+      mes: [escuela?.mes , Validators.required],
+      anio: [escuela?.anio , Validators.required],
+      monto: [escuela?.monto , Validators.required],
     });
+
+    const meses = [
+      { value: 1, label: 'Enero' },
+      { value: 2, label: 'Febrero' },
+      { value: 3, label: 'Marzo' },
+      { value: 4, label: 'Abril' },
+      { value: 5, label: 'Mayo' },
+      { value: 6, label: 'Junio' },
+      { value: 7, label: 'Julio' },
+      { value: 8, label: 'Agosto' },
+      { value: 9, label: 'Septiembre' },
+      { value: 10, label: 'Octubre' },
+      { value: 11, label: 'Noviembre' },
+      { value: 12, label: 'Diciembre' },
+    ];
+
+    // Generar dinámicamente los años desde el actual hasta 10 años adelante
+    const currentYear = new Date().getFullYear();
+    const anios = Array.from({ length: 11 }, (_, i) => ({
+      value: currentYear + i,
+      label: (currentYear + i).toString(),
+    }));
 
     const dialogRef = this.dialog.open(ModalDialogComponent, {
       width: '726px',
       disableClose: false,
       data: {
-      title: escuela ? 'Editar Escuela' : 'Agregar Escuela',
+      title: escuela ? 'Editar Presupuesto' : 'Agregar Presupuesto',
       columns: 1,
-      message: 'Seleccione el grado de la escuela',
+      message: 'Llene los datos del presupuesto',
       showCancelButton: true,
       cancelButtonText: 'Cancelar',
       showActionButton: true,
@@ -111,15 +136,20 @@ export class EscuelasGradosComponent {
       form: this.form,
       fields: [
         {
-        label: 'Grado',
-        name: 'id_grado',
+        label: 'Mes',
+        name: 'mes',
         type: 'select',
-        options: this.rowsGrados.map((grado) => ({
-          value: grado._id,
-          label: grado.nombre,
-        })),
-        placeholder: 'Seleccione un grado',
+        options: meses,
+        placeholder: 'Seleccione un mes',
         },
+        {
+        label: 'Año',
+        name: 'anio',
+        type: 'select',
+        options: anios,
+        placeholder: 'Seleccione un año',
+        },
+        { label: 'Monto', name: 'monto', type: 'number', placeholder: 'Monto Mensual' },
       ],
       },
     });
@@ -138,14 +168,14 @@ export class EscuelasGradosComponent {
   // 🔹 Agregar una nueva escuela a la API
   agregarEscuela(nuevaEscuela: any) {
     console.log('Nueva escuela:', nuevaEscuela);
-    this.apiService.crearGradoEscuela(nuevaEscuela).subscribe({
+    this.apiService.savePresupuestoEscuela(nuevaEscuela).subscribe({
       next: () => {
-        this.toast.success('Grado agregado correctamente a la escuela', 'Éxito');
+        this.toast.success('Presupuesto agregado correctamente a la escuela', 'Éxito');
         this.obtenerEscuelas(this.escuela);
       },
       error: (error) => {
         if (error?.error) {
-          this.toast.error('Este grado ya está asignado a la escuela.', 'Error');
+          this.toast.error('Este presupuesto ya está asignado a la escuela.', 'Error');
         } else {
           console.error('Error al agregar escuela:', error);
         }
@@ -155,15 +185,15 @@ export class EscuelasGradosComponent {
 
   // 🔹 Actualizar una escuela en la API
   actualizarEscuela(id: string, escuela: any) {
-    this.apiService.actualizarEscuela(id, escuela).subscribe({
-      next: () => {
-        this.toast.success('Escuela actualizada correctamente', 'Éxito');
-        // this.obtenerEscuelas();
-      },
-      error: (error) => {
-        console.error('Error al actualizar escuela:', error);
-      },
-    });
+    // this.apiService.actualizarEscuela(id, escuela).subscribe({
+    //   next: () => {
+    //     this.toast.success('Escuela actualizada correctamente', 'Éxito');
+    //     // this.obtenerEscuelas();
+    //   },
+    //   error: (error) => {
+    //     console.error('Error al actualizar escuela:', error);
+    //   },
+    // });
   }
 
   // 🔹 Eliminar una escuela de la API
@@ -172,13 +202,13 @@ export class EscuelasGradosComponent {
     if (
       confirm(`¿Seguro que deseas eliminar el grado "${escuela.nombre}"?`)
     ) {
-      this.apiService.eliminarGradoEscuela(escuela.id).subscribe({
+      this.apiService.deletePresupuestoEscuela(escuela._id).subscribe({
         next: () => {
-          this.toast.success('Grado eliminado correctamente de la escuela', 'Éxito');
+          this.toast.success('Presupuesto eliminado correctamente de la escuela', 'Éxito');
           this.obtenerEscuelas(this.escuela);
         },
         error: (error) => {
-          this.toast.error('Error al eliminar el grado de la escuela', 'Error');
+          this.toast.error('Error al eliminar el presupuesto de la escuela', 'Error');
           console.error('Error al eliminar escuela:', error);
         },
       });
@@ -186,7 +216,8 @@ export class EscuelasGradosComponent {
   }
 
   goGrade(escuela: any) {
-    const concatenatedData = `${this.idescuela},${escuela.id}`;
+    console.log('Ir a grados de la escuela:', escuela);
+    const concatenatedData = `${this.idescuela},${escuela._id}`;
     console.log('Concatenated Data:', concatenatedData);
     this.router.navigate([`/grados-presupuesto/${concatenatedData}`]);
   }

@@ -73,7 +73,7 @@
 
     <!-- Template para los iconos de acción -->
     <ng-template #actionTpl let-row="row">
-        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)" [class.disabled]="true" style="pointer-events: none; opacity: 0.5;">
             edit
         </span>
 

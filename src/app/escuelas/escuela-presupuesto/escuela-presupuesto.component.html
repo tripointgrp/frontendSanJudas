@@ -1,18 +1,21 @@
 <div class="escuelas-container">
-  <h1>Grados</h1>
+  <h1>{{title}}</h1>
 
   <div class="buscador-agregar-container">
     <div class="buscador">
       <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()" class="buscador-input" />
       <span class="material-symbols-outlined buscador-icon">search</span>
     </div>
-    <button *ngIf="dataInfo !== 'Usuario_comun'" class="submit-button" (click)="abrirModal()">Agregar grado</button>
+    <button *ngIf="dataInfo !== 'Usuario_comun'" class="submit-button" (click)="abrirModal()">Agregar presupuesto</button>
   </div>
 
   <ngx-datatable
     [rows]="filteredRows"
     [columns]="[
-        { prop: 'nombre', name: 'Nombre', flexGrow: 5 },
+        { prop: 'anio', name: 'Año', flexGrow: 5 },
+        { prop: 'mes_label', name: 'Mes', flexGrow: 5 },
+        { prop: 'monto', name: 'Monto', flexGrow: 5 },
+        { name: 'Presupuestos por grado', cellTemplate: gradeTpl, flexGrow: 1 },
         { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 1 }
     ]"
     class="bootstrap force-table"
@@ -27,7 +30,7 @@
   <ng-template #gradeTpl let-row="row">
     <button class="home-button" (click)="goGrade(row)">
     <span class="material-symbols-outlined">payments</span>
-    <span class="badge">{{ row?.cantidad_presupuestos }}</span>
+    <span class="badge">{{ row?.cantidad_grados }}</span>
     </button>
   </ng-template>
   <!-- Template para los iconos de acción -->

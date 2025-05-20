@@ -66,6 +66,7 @@ export class ModalDialogPedidoComponent {
   }
 
   ngOnInit() {
+    console.log('Datos iniciales:', this.data?.pedidoEdit);
     this.form
       .get('fechaInicio')
       ?.valueChanges.subscribe(() => this.calcularDiasDisponibles());
@@ -110,6 +111,58 @@ export class ModalDialogPedidoComponent {
         this.diasSeleccionables.push(diaGroup);
       });
     }
+
+    if (this.data.pedidoEdit) {
+      const pedido = this.data.pedidoEdit;
+      console.log('Pedido edit:', pedido);
+
+      this.form.patchValue({
+        escuela: pedido.id_escuela,
+        fechaInicio: pedido.fecha_inicio.split('T')[0],
+        fechaFin: pedido.fecha_fin.split('T')[0],
+      });
+
+      console.log(this.form.value);
+
+      this.calcularDiasDisponibles();
+
+      setTimeout(() => {
+        this.cargarGrados(pedido.id_escuela._id).then(() => {
+          pedido.dias.forEach((diaEditado: any) => {
+            const diaControl = this.diasSeleccionables.controls.find(
+              (d: AbstractControl) => d.get('fecha')?.value === diaEditado.fecha
+            );
+
+            if (diaControl) {
+              diaControl.get('seleccionado')?.setValue(true);
+
+              const productosArray = diaControl.get('productos') as FormArray;
+
+              diaEditado.detalles.forEach((detalle: any) => {
+                const grupo: { [key: string]: FormControl } = {
+                  producto: new FormControl(detalle.id_producto),
+                  unidad_medida: new FormControl(detalle.unidad_medida),
+                };
+
+                this.grados.forEach((grado, index) => {
+                  grupo[`cantidad_${index}`] = new FormControl(
+                    detalle.id_grado._id === grado.id ? detalle.cantidad : 0,
+                    Validators.required
+                  );
+                });
+
+                productosArray.push(this.fb.group(grupo));
+              });
+            }
+          });
+
+          // Mostrar el paso 2 directamente
+          this.expandirModal();
+        });
+      }, 200);
+    }
+
+
   }
 
 
@@ -140,9 +193,9 @@ export class ModalDialogPedidoComponent {
     grupoProducto.get('producto')?.valueChanges.subscribe((productoSeleccionado: any) => {
       const unidadObj = productoSeleccionado?.id_unidad_medida
         ? {
-            id: productoSeleccionado.id_unidad_medida._id,
-            nombre: productoSeleccionado.id_unidad_medida.nombre,
-          }
+          id: productoSeleccionado.id_unidad_medida._id,
+          nombre: productoSeleccionado.id_unidad_medida.nombre,
+        }
         : { id: null, nombre: '' };
 
       grupoProducto.get('unidad_medida')?.setValue(unidadObj);

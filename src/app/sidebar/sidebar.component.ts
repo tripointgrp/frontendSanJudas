@@ -2,17 +2,27 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class SidebarComponent {
+  tipoUsuario: string = '';
     constructor(private router: Router, private authService: AuthService) {}
+
+    ngOnInit() {
+      // Aquí puedes agregar lógica adicional si es necesario
+      const datos = this.authService.getUserData();
+      this.tipoUsuario = datos ? datos.tipo_usuario : '';
+      console.log('Datos del usuario:', datos);
+      console.log('Tipo de usuario:', this.tipoUsuario);
+    }
 
     handleClick(item: any) {
       console.log('click', item);

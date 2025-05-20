@@ -1,0 +1,31 @@
+<div class="escuelas-container">
+  <h1>Presupuestos por grado</h1>
+
+  <div class="buscador-agregar-container">
+    <div class="buscador">
+      <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()"
+        class="buscador-input" />
+      <span class="material-symbols-outlined buscador-icon">search</span>
+    </div>
+    <button *ngIf="dataInfo !== 'Usuario_comun'" class="submit-button" (click)="abrirModal()">Agregar presupuesto</button>
+  </div>
+
+  <ngx-datatable [rows]="filteredRows" [columns]="[
+        { prop: 'nombre_grado', name: 'Nombre grado', flexGrow: 5 },
+        { prop: 'mes_label', name: 'Mes', flexGrow: 5 },
+        { prop: 'monto', name: 'Monto', flexGrow: 5 },
+        { prop: 'anio', name: 'Año', flexGrow: 5 },
+          { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 1 }
+      ]" class="bootstrap force-table" columnMode="force" [headerHeight]="60" [footerHeight]="50" [scrollLeft]="true"
+    [rowHeight]="50" [scrollbarV]="false">
+  </ngx-datatable>
+  <!-- Template para los iconos de acción -->
+  <ng-template #actionTpl let-row="row">
+    <!-- <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+            edit
+        </span> -->
+    <span *ngIf="dataInfo !== 'Usuario_comun'" class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
+      delete
+    </span>
+  </ng-template>
+</div>

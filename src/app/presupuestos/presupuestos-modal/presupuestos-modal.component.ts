@@ -27,26 +27,26 @@ export class PresupuestosModalComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<PresupuestosModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
-totalCalculado: number = 0;
+  ) { }
+  totalCalculado: number = 0;
 
-ngOnInit(): void {
-  if (this.data && this.data.dias) {
-    this.data.dias = this.data.dias.map((dia: any) => {
-      return {
-        ...dia,
-        productosAgrupados: this.agruparPorProducto(dia.detalles)
-      };
-    });
+  ngOnInit(): void {
+    if (this.data && this.data.dias) {
+      this.data.dias = this.data.dias.map((dia: any) => {
+        return {
+          ...dia,
+          productosAgrupados: this.agruparPorProducto(dia.detalles)
+        };
+      });
 
-    this.totalCalculado = this.data.dias.reduce(
-      (sum: number, dia: any) => sum + (dia.total_dia || 0),
-      0
-    );
-  } else {
-    this.totalCalculado = 0;
+      this.totalCalculado = this.data.dias.reduce(
+        (sum: number, dia: any) => sum + (dia.total_dia || 0),
+        0
+      );
+    } else {
+      this.totalCalculado = 0;
+    }
   }
-}
 
 
   cerrar(): void {
@@ -91,6 +91,20 @@ ngOnInit(): void {
 
     return Object.values(grouped);
   }
+
+  getTotalesPorGrado(detalles: any[]): { [grado: string]: number } {
+    const totales: { [grado: string]: number } = {};
+
+    for (const detalle of detalles) {
+      const grado = detalle.nombre_grado;
+      const subtotal = detalle.cantidad_comprada * detalle.precio_unitario;
+
+      totales[grado] = (totales[grado] || 0) + subtotal;
+    }
+
+    return totales;
+  }
+
 
 
 }

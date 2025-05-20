@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-escuelas',
@@ -24,11 +25,12 @@ export class EscuelasComponent implements OnInit {
   loading = true;
   errorMessage = '';
   form!: FormGroup;
-
-  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService, private router : Router  ) {}
+  dataInfo: any;
+  constructor(private apiService: ApiService,private authService:AuthService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService, private router : Router  ) {}
 
   ngOnInit() {
     this.obtenerEscuelas();
+    this.dataInfo = this.authService.getUserData()?.tipo_usuario
   }
 
   // 🔹 Obtener escuelas desde la API
@@ -140,5 +142,10 @@ export class EscuelasComponent implements OnInit {
   goGrade(escuela: any) {
     console.log('Ir a grados de la escuela:', escuela);
     this.router.navigate([`/escuelas-grados/${escuela._id}`]);
+  }
+
+  goPresupuesto(escuela: any) {
+    console.log('Ir a presupuesto de la escuela:', escuela);
+    this.router.navigate([`/escuelas-presupuesto/${escuela._id}`]);
   }
 }

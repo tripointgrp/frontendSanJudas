@@ -9,6 +9,7 @@ export class AuthService {
   private TOKEN_KEY = 'authToken';
   private EXPIRATION_KEY = 'tokenExpiration';
   private userToken = 'authUser';
+  private authData = 'authData';
 
 
   constructor(private router: Router) {}
@@ -34,6 +35,15 @@ export class AuthService {
 
   setUsuario(usuario: string) {
       localStorage.setItem(this.userToken, usuario);
+  }
+
+  getUserData(): any {
+    const userData = localStorage.getItem(this.authData);
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  setUserData(userData: any) {
+    localStorage.setItem(this.authData, JSON.stringify(userData));
   }
 
   // Obtener la fecha de expiración

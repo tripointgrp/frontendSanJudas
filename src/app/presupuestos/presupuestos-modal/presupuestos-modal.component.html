@@ -4,20 +4,12 @@
   <section class="info-pedido">
     <div><strong>🏫 Escuela:</strong> {{ data.id_escuela?.nombre }}</div>
     <div><strong>🔢 NIT:</strong> {{ data.id_escuela?.nit }}</div>
-    <div>
-      <strong>🏷️ Razón social:</strong> {{ data.id_escuela?.razon_social }}
-    </div>
+    <div><strong>🏷️ Razón social:</strong> {{ data.id_escuela?.razon_social }}</div>
     <div><strong>🙍 Usuario:</strong> {{ data.id_usuario?.nombre }}</div>
     <div><strong>📧 Correo:</strong> {{ data.id_usuario?.correo }}</div>
-    <div>
-      <strong>📅 Fecha de Inicio:</strong>
-      {{ data.fecha_inicio | date : "longDate" }}
-    </div>
-    <div>
-      <strong>📅 Fecha de Finalización:</strong>
-      {{ data.fecha_fin | date : "longDate" }}
-    </div>
-    <div><strong>📦 Total General:</strong> Q{{ data.total }}</div>
+    <div><strong>📅 Fecha de Inicio:</strong> {{ data.fecha_inicio | date : "longDate" }}</div>
+    <div><strong>📅 Fecha de Finalización:</strong> {{ data.fecha_fin | date : "longDate" }}</div>
+    <div><strong>📦 Total General:</strong> {{ data.total | currency:'GTQ':'symbol':'1.2-2' }}</div>
   </section>
 
   <section class="dias-detalle mt-4">
@@ -34,8 +26,8 @@
               {{ grado }}
             </th>
             <th>Precio Unitario</th>
-            <th>Total</th>
-            <th>Subtotal</th>
+            <th>Cantidad Total</th>
+            <th>Total Producto</th>
           </tr>
         </thead>
         <tbody>
@@ -45,22 +37,31 @@
             <td *ngFor="let grado of getGradosUnicos(dia.detalles)">
               {{ prod.grados?.[grado] || 0 }}
             </td>
-            <td>Q{{ prod.precio_unitario }}</td>
+            <td>{{ prod.precio_unitario | currency:'GTQ':'symbol':'1.2-2' }}</td>
             <td>{{ prod.cantidad_total }}</td>
-            <td>Q{{ prod.subtotal }}</td>
+            <td>{{ prod.subtotal | currency:'GTQ':'symbol':'1.2-2' }}</td>
+          </tr>
+
+          <!-- Fila TOTAL POR GRADO -->
+          <tr class="table-secondary">
+            <td colspan="2"><strong>Total por grado</strong></td>
+            <td *ngFor="let grado of getGradosUnicos(dia.detalles)">
+              <strong>{{ getTotalesPorGrado(dia.detalles)[grado] || 0 | currency:'GTQ':'symbol':'1.2-2' }}</strong>
+            </td>
+            <td colspan="3"></td>
           </tr>
         </tbody>
       </table>
 
       <div class="text-end mt-1">
-        <strong>💰 Total del Día:</strong> Q{{ dia.total_dia }}
+        <strong>💰 Total del Día:</strong> {{ dia.total_dia | currency:'GTQ':'symbol':'1.2-2' }}
       </div>
     </div>
   </section>
-  <div class="text-end mt-3">
-    <h5><strong>🧾 Total de todos los días:</strong> Q{{ totalCalculado }}</h5>
-  </div>
 
+  <div class="text-end mt-3">
+    <h5><strong>🧾 Total de todos los días:</strong> {{ totalCalculado | currency:'GTQ':'symbol':'1.2-2' }}</h5>
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

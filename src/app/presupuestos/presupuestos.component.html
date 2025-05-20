@@ -50,9 +50,9 @@
 
   <!-- Template para los iconos de acción -->
   <ng-template #actionTpl let-row="row">
-      <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
-          edit
-      </span>
+    <span class="material-symbols-outlined span-edit"  style="pointer-events: none; opacity: 0.5;">
+        edit
+    </span>
       <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPedido(row)">
           delete
       </span>

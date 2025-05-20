@@ -46,7 +46,7 @@ export class PedidosComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.obtenerPedidos();
@@ -57,15 +57,19 @@ export class PedidosComponent implements OnInit {
   descargarProductos() {
     console.log('Descargando productos...');
     console.log(this.fechaInicio, this.fechaFin);
-    if(this.fechaInicio && this.fechaFin) {
-      console.log('Fechas válidas:', this.fechaInicio, this.fechaFin);
-      // this.apiService
-      //   .descargarProductos(this.fechaInicio, this.fechaFin)
-      //   .subscribe((data) => {
-      //     console.log('Datos descargados:', data);
-      //     // Aquí puedes manejar la descarga del archivo o lo que necesites hacer con los datos
-      //   });
-    }else {
+    if (this.fechaInicio && this.fechaFin) {
+      // Convertir las fechas a string en formato ISO (YYYY-MM-DD)
+      const fechaInicioStr = new Date(this.fechaInicio).toISOString().slice(0, 10);
+      const fechaFinStr = new Date(this.fechaFin).toISOString().slice(0, 10);
+
+
+      this.apiService
+        .getPedidosFechas(fechaInicioStr, fechaFinStr)
+        .subscribe((data) => {
+          console.log('Datos descargados:', data);
+          // Aquí puedes manejar la descarga del archivo o lo que necesites hacer con los datos
+        });
+    } else {
       this.toastr.error('Por favor selecciona fechas válidas', 'Error');
     }
   }
@@ -114,11 +118,11 @@ export class PedidosComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.apiService.obtenerGradoEscuela(idEscuela).subscribe({
         next: (data) => {
-            const grados = Array.isArray(data.grados)
+          const grados = Array.isArray(data.grados)
             ? data.grados.map((grado: any) => ({
               id: grado.id,
               nombre: grado.nombre,
-              }))
+            }))
             : [];
 
           resolve(grados); // ✅ devolvemos los grados ya cargados
@@ -172,7 +176,7 @@ export class PedidosComponent implements OnInit {
   }
 
   abrirModal(pedido: any = null): void {
-    console.log('antes de entrar', this.rowsProductos)
+    console.log('antes de entrar', pedido)
     const dialogRef = this.dialog.open(ModalDialogPedidoComponent, {
       maxWidth: 'none', // 🔹 Permite que el diálogo tome el tamaño definido en width
       width: '80vh', // 🔹 El 90% del ancho de la ventana
@@ -183,6 +187,7 @@ export class PedidosComponent implements OnInit {
         message: 'Ingrese los datos del pedido',
         showCancelButton: true,
         columns: 2,
+        pedidoEdit: pedido || null,
         cancelButtonText: 'Cancelar',
         showActionButton: true,
         actionButtonText: pedido ? 'Actualizar' : 'Guardar',
@@ -249,10 +254,10 @@ export class PedidosComponent implements OnInit {
   generarPDF(pedido: any): void {
     console.log('Se disparó generarPDF:', pedido); // 🔍 Verifica si esto aparece
 
-  if (!pedido || !Array.isArray(pedido.dias)) {
-    console.error('Pedido inválido o sin días');
-    return;
-  }
+    if (!pedido || !Array.isArray(pedido.dias)) {
+      console.error('Pedido inválido o sin días');
+      return;
+    }
 
     const docDefinition = {
       content: [
