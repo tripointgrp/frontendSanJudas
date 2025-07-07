@@ -24,12 +24,12 @@ export class ApiService {
 
   //  Obtener todos los datos desde el backend
   getData(): Observable<any> {
-    return this.http.get(`${this.apiUrl}${this.usuarios}/obtener`);
+    return this.http.get(`${this.apiUrl}${this.usuarios}obtener`);
   }
 
   //  Productos
   obtenerProductos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}${this.productos}/obtener`);
+    return this.http.get<any[]>(`${this.apiUrl}${this.productos}obtener`);
   }
 
   eliminarProducto(id: string): Observable<any> {
@@ -146,7 +146,7 @@ export class ApiService {
   }
 
   obtenerPedidoCompleto(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}${this.pedidosUnificados}/todos-completo`);
+    return this.http.get<any[]>(`${this.apiUrl}${this.pedidosUnificados}todos-completo`);
   }
 
 
