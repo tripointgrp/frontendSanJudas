@@ -19,8 +19,44 @@ export class ApiService {
   escuelas_grados: string = 'api/escuelas_grados/';
   grados: string = 'api/grados/';
   presupuestos: string = 'api/presupuestos-real/';
+  presupuestoEscuela: string = 'api/PresupuestoEscuelaV2';
+  presupuestoGrados: string = 'api/PresupuestoGradoV2';
 
   constructor(private http: HttpClient) {}
+
+  // CRUD Presupuestos ----------------------------------------------------------------------
+  getPresupuestosEscuelas(id: any): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}${this.presupuestoEscuela}/por-escuela/${id}`);	
+  }
+
+  getPresupuestosGrados(id: any): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}${this.presupuestoGrados}/por-presupuesto/${id}`);	
+  }
+
+  savePresupuestoEscuela(presupuesto: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}${this.presupuestoEscuela}/crear`, presupuesto);
+  }
+
+  savePresupuestoGrado(presupuesto: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}${this.presupuestoGrados}/crear`, presupuesto);
+  }
+  
+  deletePresupuestoEscuela(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}${this.presupuestoEscuela}/eliminar/${id}`);
+  }
+
+  deletePresupuestoGrado(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}${this.presupuestoGrados}/eliminar/${id}`);
+  }
+
+getPedidosFechas(fechaInicio: string, fechaFin: string): Observable<any[]> {
+  const params = {
+    fecha_inicio: fechaInicio,
+    fecha_fin: fechaFin
+  };
+
+  return this.http.get<any[]>(`${this.apiUrl}${this.pedidosUnificados}productos-por-fechas`, { params });
+}
 
   //  Obtener todos los datos desde el backend
   getData(): Observable<any> {

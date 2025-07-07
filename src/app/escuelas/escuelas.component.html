@@ -6,7 +6,7 @@
         <input type="text" placeholder="Buscar escuela..." [(ngModel)]="searchTerm" (input)="filterEscuelas()" class="buscador-input" />
         <span class="material-symbols-outlined buscador-icon">search</span>
       </div>
-      <button class="submit-button" (click)="abrirModal()">Agregar escuela</button>
+      <button *ngIf="dataInfo !== 'Usuario_comun'" class="submit-button" (click)="abrirModal()">Agregar escuela</button>
     </div>
 
     <ngx-datatable
@@ -16,6 +16,7 @@
           { prop: 'nit', name: 'NIT', flexGrow: 2 },
           { prop: 'razon_social', name: 'Razón Social', flexGrow: 2 },
           { name: 'Grados', cellTemplate: gradeTpl, flexGrow: 1 },
+          { name: 'Presupuestos Mensuales', cellTemplate: gradeTpl2, flexGrow: 1 },
           { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 1 }
       ]"
       class="bootstrap force-table"
@@ -33,12 +34,18 @@
       <span class="badge">{{ row.cantidadGrados }}</span>
       </button>
     </ng-template>
+    <ng-template #gradeTpl2 let-row="row">
+      <button class="home-button" (click)="goPresupuesto(row)">
+      <span class="material-symbols-outlined">history_edu</span>
+      <span class="badge">{{ row.cantidadPresupuestos }}</span>
+      </button>
+    </ng-template>
     <!-- Template para los iconos de acción -->
-    <ng-template #actionTpl let-row="row">
-        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
+    <ng-template  #actionTpl let-row="row">
+        <span *ngIf="dataInfo !== 'Usuario_comun'" class="material-symbols-outlined span-edit" (click)="abrirModal(row)">
             edit
         </span>
-        <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
+        <span *ngIf="dataInfo !== 'Usuario_comun'" class="btn-delete material-symbols-outlined span-delete" (click)="eliminarEscuela(row)">
             delete
         </span>
     </ng-template>

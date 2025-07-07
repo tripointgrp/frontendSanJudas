@@ -46,29 +46,93 @@ export class PedidosComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.obtenerPedidos();
     this.obtenerEscuelas();
     this.obtenerProductos();
   }
+formatearFechaLarga(fecha: Date): string {
+  const opciones: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  };
+
+  return fecha.toLocaleDateString('es-ES', opciones);
+}
 
   descargarProductos() {
-    console.log('Descargando productos...');
-    console.log(this.fechaInicio, this.fechaFin);
-    if(this.fechaInicio && this.fechaFin) {
-      console.log('Fechas válidas:', this.fechaInicio, this.fechaFin);
-      // this.apiService
-      //   .descargarProductos(this.fechaInicio, this.fechaFin)
-      //   .subscribe((data) => {
-      //     console.log('Datos descargados:', data);
-      //     // Aquí puedes manejar la descarga del archivo o lo que necesites hacer con los datos
-      //   });
-    }else {
-      this.toastr.error('Por favor selecciona fechas válidas', 'Error');
-    }
+  if (!this.fechaInicio || !this.fechaFin) {
+    this.toastr.error('Por favor selecciona fechas válidas', 'Error');
+    return;
   }
+
+  const fechaInicioStr = new Date(this.fechaInicio).toISOString().slice(0, 10);
+  const fechaFinStr = new Date(this.fechaFin).toISOString().slice(0, 10);
+
+  this.apiService.getPedidosFechas(fechaInicioStr, fechaFinStr).subscribe({
+    next: (productos) => {
+      if (!productos || productos.length === 0) {
+        this.toastr.warning('No se encontraron productos en ese rango de fechas.', 'Sin datos');
+        return;
+      }
+
+      // Construir tabla
+   const tablaBody = [
+  ['Producto', 'Unidad', 'Cantidad'],
+  ...productos.map((p) => [
+    p.producto,
+    p.unidad,
+    Number.isInteger(p.cantidad_total)
+      ? p.cantidad_total.toString()
+      : p.cantidad_total.toFixed(2)
+  ])
+];
+
+
+
+      // Definir PDF
+      const docDefinition: any = {
+        content: [
+          { text: 'Lista de Ingredientes', style: 'header', alignment: 'center' },
+          {
+            text: `De: ${new Date(this.fechaInicio!).toLocaleDateString()} - ${new Date(this.fechaFin!).toLocaleDateString()}`,
+
+
+            alignment: 'center',
+            margin: [0, 0, 0, 10]
+          },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', 'auto', 'auto'],
+              body: tablaBody
+            },
+            layout: 'lightHorizontalLines'
+          }
+        ],
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            color: '#2E7D32',
+            margin: [0, 0, 0, 10]
+          }
+        }
+      };
+
+      pdfMake.createPdf(docDefinition).download(`Lista_Ingredientes_${fechaInicioStr}_a_${fechaFinStr}.pdf`);
+    },
+    error: () => {
+      this.toastr.error('Error al obtener los productos', 'Error');
+    }
+  });
+}
+
+
+
 
   toggleSwitch() {
     console.log('Switch activado/desactivado:', this.isSwitchOn);
@@ -114,11 +178,11 @@ export class PedidosComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.apiService.obtenerGradoEscuela(idEscuela).subscribe({
         next: (data) => {
-            const grados = Array.isArray(data.grados)
+          const grados = Array.isArray(data.grados)
             ? data.grados.map((grado: any) => ({
               id: grado.id,
               nombre: grado.nombre,
-              }))
+            }))
             : [];
 
           resolve(grados); // ✅ devolvemos los grados ya cargados
@@ -172,7 +236,7 @@ export class PedidosComponent implements OnInit {
   }
 
   abrirModal(pedido: any = null): void {
-    console.log('antes de entrar', this.rowsProductos)
+    console.log('antes de entrar', pedido)
     const dialogRef = this.dialog.open(ModalDialogPedidoComponent, {
       maxWidth: 'none', // 🔹 Permite que el diálogo tome el tamaño definido en width
       width: '80vh', // 🔹 El 90% del ancho de la ventana
@@ -183,6 +247,7 @@ export class PedidosComponent implements OnInit {
         message: 'Ingrese los datos del pedido',
         showCancelButton: true,
         columns: 2,
+        pedidoEdit: pedido || null,
         cancelButtonText: 'Cancelar',
         showActionButton: true,
         actionButtonText: pedido ? 'Actualizar' : 'Guardar',
@@ -249,10 +314,10 @@ export class PedidosComponent implements OnInit {
   generarPDF(pedido: any): void {
     console.log('Se disparó generarPDF:', pedido); // 🔍 Verifica si esto aparece
 
-  if (!pedido || !Array.isArray(pedido.dias)) {
-    console.error('Pedido inválido o sin días');
-    return;
-  }
+    if (!pedido || !Array.isArray(pedido.dias)) {
+      console.error('Pedido inválido o sin días');
+      return;
+    }
 
     const docDefinition = {
       content: [
@@ -300,7 +365,8 @@ export class PedidosComponent implements OnInit {
 
     };
 
-    pdfMake.createPdf(docDefinition as any).download('Pedido.pdf');
+   pdfMake.createPdf(docDefinition as any).download('Lista_Compras.pdf');
+
 
 
   }

@@ -25,9 +25,10 @@ export class LoginComponent {
     this.http.post<any>(environment.apiUrl+'api/usuarios/login', { correo: this.email, clave: this.password }).subscribe(
       (response) => {
         if (response.token) {
+          console.log('Login exitoso:', response);
           this.authService.setToken(response.token);
           this.authService.setUsuario(response.usuario.id);
-
+          this.authService.setUserData(response.usuario);
           this.router.navigate(['/home']); // Redirigir si el login es exitoso
         }
         this.loading = false;

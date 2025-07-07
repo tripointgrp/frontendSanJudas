@@ -7,7 +7,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../services/api.service';
 import { ToastrService } from 'ngx-toastr';
-
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+(pdfMake as any).vfs = pdfFonts.vfs;
 
 @Component({
   selector: 'app-productos',
@@ -208,9 +210,64 @@ export class ProductosComponent {
   }
 
 
-  downloadPrices(item:any){
-    console.log(item)
+downloadPrices(item: any[]) {
+  const productos = item.map(p => [
+    { text: p.nombre, alignment: 'left', style: 'cell' },
+    { text: `Q ${Number(p.precio_variable).toFixed(2)}`, alignment: 'center', style: 'cell' },
+    { text: p.marca || 'N/A', alignment: 'center', style: 'cell' },
+    { text: p.id_categoria?.nombre || 'N/A', alignment: 'center', style: 'cell' },
+    { text: p.id_unidad_medida?.nombre || 'N/A', alignment: 'center', style: 'cell' },
+  ]);
+
+  const docDefinition: any = {
+    content: [
+      { text: 'Lista de Productos con Precios', style: 'header' },
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+          body: [
+            [
+              { text: 'Producto', style: 'tableHeader' },
+              { text: 'Precio (Q)', style: 'tableHeader' },
+              { text: 'Marca', style: 'tableHeader' },
+              { text: 'Categoría', style: 'tableHeader' },
+              { text: 'Unidad', style: 'tableHeader' }
+            ],
+            ...productos
+          ]
+        },
+        layout: {
+  fillColor: (rowIndex: number, node: any, columnIndex: number) => {
+    return rowIndex === 0 ? '#E3F2FD' : null;
   }
+}
+
+      }
+    ],
+    styles: {
+      header: {
+        fontSize: 18,
+        bold: true,
+        margin: [0, 0, 0, 10],
+        color: '#2E7D32'
+      },
+      tableHeader: {
+        bold: true,
+        fontSize: 12,
+        color: '#1a237e',
+        alignment: 'center'
+      },
+      cell: {
+        fontSize: 10,
+        margin: [0, 5, 0, 5]
+      }
+    }
+  };
+
+  pdfMake.createPdf(docDefinition).download('Lista_Productos.pdf');
+}
+
 
 
   abrirModal(): void {
