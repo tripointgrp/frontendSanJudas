@@ -1,98 +1,95 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // private isAuthenticated = false; // Variable para controlar si el usuario está autenticado
   private TOKEN_KEY = 'authToken';
   private EXPIRATION_KEY = 'tokenExpiration';
   private userToken = 'authUser';
   private authData = 'authData';
 
+  constructor(
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  constructor(private router: Router) {}
+  private isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
 
   // Guardar token y su expiración
   setToken(token: string) {
+    if (!this.isBrowser()) return;
+
     const decodedToken = this.decodeToken(token);
     if (decodedToken && decodedToken.exp) {
-      const expiration = decodedToken.exp * 1000; // Convertir a milisegundos
+      const expiration = decodedToken.exp * 1000;
       localStorage.setItem(this.TOKEN_KEY, token);
       localStorage.setItem(this.EXPIRATION_KEY, expiration.toString());
     }
   }
 
-  // Obtener el token
   getToken(): string | null {
+    if (!this.isBrowser()) return null;
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
   getUsuario(): string | null {
+    if (!this.isBrowser()) return null;
     return localStorage.getItem(this.userToken);
   }
 
   setUsuario(usuario: string) {
-      localStorage.setItem(this.userToken, usuario);
+    if (!this.isBrowser()) return;
+    localStorage.setItem(this.userToken, usuario);
   }
 
   getUserData(): any {
+    if (!this.isBrowser()) return null;
+
     const userData = localStorage.getItem(this.authData);
     return userData ? JSON.parse(userData) : null;
   }
 
   setUserData(userData: any) {
+    if (!this.isBrowser()) return;
     localStorage.setItem(this.authData, JSON.stringify(userData));
   }
 
-  // Obtener la fecha de expiración
   getTokenExpiration(): number | null {
+    if (!this.isBrowser()) return null;
+
     const expiration = localStorage.getItem(this.EXPIRATION_KEY);
     return expiration ? parseInt(expiration, 10) : null;
   }
 
-  // Verificar si el token es válido
   isAuthenticated(): boolean {
+    if (!this.isBrowser()) return false;
+
     const expiration = this.getTokenExpiration();
     return expiration ? Date.now() < expiration : false;
   }
 
-  // Decodificar el token JWT
   decodeToken(token: string): any {
+    if (!this.isBrowser()) return null;
+
     try {
-      const payload = token.split('.')[1]; // Extraer payload del JWT
-      return JSON.parse(atob(payload)); // Decodificar Base64
-    } catch (e) {
+      const payload = token.split('.')[1];
+      return JSON.parse(atob(payload));
+    } catch {
       return null;
     }
   }
 
-  // Cerrar sesión (Eliminar token)
   logout() {
+    if (!this.isBrowser()) return;
+
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.EXPIRATION_KEY);
-    localStorage.clear(); // Limpia cualquier otro dato almacenado
-    this.router.navigate(['/login']); // Redirige al login
+    localStorage.clear();
+    this.router.navigate(['/login']);
   }
-
-  // login(username: string, password: string): boolean {
-  //   // Simulación de login (reemplázalo con una API real)
-  //   if (username === 'admin' && password === '123456') {
-  //     localStorage.setItem('token', 'user-token');
-  //     this.isAuthenticated = true;
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
-  // isLoggedIn(): boolean {
-  //   return typeof window !== 'undefined' && localStorage.getItem('token') !== null;
-  // }
-
-  // logout(): void {
-  //   if (typeof window !== 'undefined') {
-  //     localStorage.removeItem('token');
-  //   }
-  // }
 }
