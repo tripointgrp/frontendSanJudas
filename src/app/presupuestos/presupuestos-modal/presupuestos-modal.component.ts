@@ -2,9 +2,9 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-(pdfMake as any).vfs = pdfFonts.vfs;
+// import pdfMake from 'pdfmake/build/pdfmake';
+// import pdfFonts from 'pdfmake/build/vfs_fonts';
+// (pdfMake as any).vfs = pdfFonts.vfs;
 interface ProductoAgrupado {
   producto: string;
   unidad: string;
@@ -26,6 +26,8 @@ interface ProductoAgrupado {
   styleUrl: './presupuestos-modal.component.scss'
 })
 export class PresupuestosModalComponent implements OnInit {
+  private pdfMake: any | null = null;
+
   constructor(
     public dialogRef: MatDialogRef<PresupuestosModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -49,6 +51,23 @@ export class PresupuestosModalComponent implements OnInit {
       this.totalCalculado = 0;
     }
   }
+
+  private async loadPdfMake() {
+  if (typeof window === 'undefined') return null; // SSR guard
+
+  if (this.pdfMake) return this.pdfMake;
+
+  const pdfMakeModule: any = await import('pdfmake/build/pdfmake');
+  const pdfFontsModule: any = await import('pdfmake/build/vfs_fonts');
+
+  const pdfMake = pdfMakeModule.default || pdfMakeModule;
+  const pdfFonts = pdfFontsModule.default || pdfFontsModule;
+
+  pdfMake.vfs = pdfFonts.pdfMake?.vfs || pdfFonts.vfs;
+
+  this.pdfMake = pdfMake;
+  return pdfMake;
+}
 
 
   cerrar(): void {
@@ -107,7 +126,9 @@ export class PresupuestosModalComponent implements OnInit {
     return totales;
   }
 
-imprimirPDF() {
+  async imprimirPDF() {
+  const pdfMake = await this.loadPdfMake();
+  if (!pdfMake) return;
   const grados = this.getGradosUnicosDesdeTodosLosDias();
   let totalPreprimaria = 0;
   let totalPrimaria = 0;
@@ -173,7 +194,7 @@ imprimirPDF() {
                     text: cell.toString(),
                     style: 'cell',
                     alignment: 'center',
-                     noWrap: false 
+                     noWrap: false
                   }))
                 )
               ]

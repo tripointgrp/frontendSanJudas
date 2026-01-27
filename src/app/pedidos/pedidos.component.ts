@@ -10,12 +10,12 @@ import { ModalDialogPedidoComponent } from '../components/modal-dialog-pedido/mo
 import { ToastrService } from 'ngx-toastr';
 import { PedidosModalComponent } from './pedidos-modal/pedidos-modal.component';
 
-// ✅ Importar pdfMake y fuentes de forma compatible con Vite
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+// // ✅ Importar pdfMake y fuentes de forma compatible con Vite
+// import pdfMake from 'pdfmake/build/pdfmake';
+// import pdfFonts from 'pdfmake/build/vfs_fonts';
 
-// ✅ Asignar fuentes virtuales correctamente
-(pdfMake as any).vfs = pdfFonts.vfs;
+// // ✅ Asignar fuentes virtuales correctamente
+// (pdfMake as any).vfs = pdfFonts.vfs;
 
 
 
@@ -41,6 +41,8 @@ export class PedidosComponent implements OnInit {
   fechaInicio: Date | null = null;
   fechaFin: Date | null = null;
   isSwitchOn = false
+  private pdfMake: any | null = null;
+
   constructor(
     private apiService: ApiService,
     private dialog: MatDialog,
@@ -53,43 +55,65 @@ export class PedidosComponent implements OnInit {
     this.obtenerEscuelas();
     this.obtenerProductos();
   }
-formatearFechaLarga(fecha: Date): string {
-  const opciones: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  };
 
-  return fecha.toLocaleDateString('es-ES', opciones);
-}
+  formatearFechaLarga(fecha: Date): string {
+    const opciones: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    };
 
-  descargarProductos() {
-  if (!this.fechaInicio || !this.fechaFin) {
-    this.toastr.error('Por favor selecciona fechas válidas', 'Error');
-    return;
+    return fecha.toLocaleDateString('es-ES', opciones);
   }
 
-  const fechaInicioStr = new Date(this.fechaInicio).toISOString().slice(0, 10);
-  const fechaFinStr = new Date(this.fechaFin).toISOString().slice(0, 10);
+  private async loadPdfMake() {
+    if (typeof window === 'undefined') return null; // SSR guard
 
-  this.apiService.getPedidosFechas(fechaInicioStr, fechaFinStr).subscribe({
-    next: (productos) => {
-      if (!productos || productos.length === 0) {
-        this.toastr.warning('No se encontraron productos en ese rango de fechas.', 'Sin datos');
-        return;
-      }
+    if (this.pdfMake) return this.pdfMake;
 
-      // Construir tabla
-   const tablaBody = [
-  ['Producto', 'Unidad', 'Cantidad'],
-  ...productos.map((p) => [
-    p.producto,
-    p.unidad,
-    Number.isInteger(p.cantidad_total)
-      ? p.cantidad_total.toString()
-      : p.cantidad_total.toFixed(2)
-  ])
-];
+    const pdfMakeModule: any = await import('pdfmake/build/pdfmake');
+    const pdfFontsModule: any = await import('pdfmake/build/vfs_fonts');
+
+    const pdfMake = pdfMakeModule.default || pdfMakeModule;
+    const pdfFonts = pdfFontsModule.default || pdfFontsModule;
+
+    // OJO: dependiendo del build, vfs puede venir en pdfFonts.pdfMake.vfs
+    pdfMake.vfs = pdfFonts.pdfMake?.vfs || pdfFonts.vfs;
+
+    this.pdfMake = pdfMake;
+    return pdfMake;
+  }
+
+  async descargarProductos() {
+  const pdfMake = await this.loadPdfMake();
+  if (!pdfMake) return;
+
+    if (!this.fechaInicio || !this.fechaFin) {
+      this.toastr.error('Por favor selecciona fechas válidas', 'Error');
+      return;
+    }
+
+    const fechaInicioStr = new Date(this.fechaInicio).toISOString().slice(0, 10);
+    const fechaFinStr = new Date(this.fechaFin).toISOString().slice(0, 10);
+
+    this.apiService.getPedidosFechas(fechaInicioStr, fechaFinStr).subscribe({
+      next: (productos) => {
+        if (!productos || productos.length === 0) {
+          this.toastr.warning('No se encontraron productos en ese rango de fechas.', 'Sin datos');
+          return;
+        }
+
+        // Construir tabla
+    const tablaBody = [
+    ['Producto', 'Unidad', 'Cantidad'],
+    ...productos.map((p) => [
+      p.producto,
+      p.unidad,
+      Number.isInteger(p.cantidad_total)
+        ? p.cantidad_total.toString()
+        : p.cantidad_total.toFixed(2)
+    ])
+  ];
 
 
 
@@ -318,8 +342,10 @@ formatFecha (fecha: string) {
     }
   }
   // 🔹 Función para generar PDF de un pedido
-  generarPDF(pedido: any): void {
+  async generarPDF(pedido: any): Promise<void> {
     console.log('Se disparó generarPDF:', pedido); // 🔍 Verifica si esto aparece
+    const pdfMake = await this.loadPdfMake();
+      if (!pdfMake) return;
 
     if (!pedido || !Array.isArray(pedido.dias)) {
       console.error('Pedido inválido o sin días');
