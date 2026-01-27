@@ -98,7 +98,7 @@ formatearFechaLarga(fecha: Date): string {
         content: [
           { text: 'Lista de Ingredientes', style: 'header', alignment: 'center' },
           {
-            text: `De: ${new Date(this.fechaInicio!).toLocaleDateString()} - ${new Date(this.fechaFin!).toLocaleDateString()}`,
+            text: `De: ${this.formatFecha(fechaInicioStr)} - ${this.formatFecha(fechaFinStr)}`,
 
 
             alignment: 'center',
@@ -130,6 +130,13 @@ formatearFechaLarga(fecha: Date): string {
     }
   });
 }
+
+formatFecha (fecha: string) {
+  const [year, month, day] = fecha.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+
 
 
 

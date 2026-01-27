@@ -253,16 +253,22 @@ export class ModalDialogPedidoComponent {
 
     return null;
   }
-
   fechaMinimaValidator(minDate: Date) {
     return (control: FormControl) => {
-      const valor = control.value;
-      if (!valor) return null;
-      const fecha = new Date(valor);
+      if (!control.value) return null;
+
+      const [year, month, day] = control.value.split('-').map(Number);
+      const fecha = new Date(year, month - 1, day); // LOCAL real
       fecha.setHours(0, 0, 0, 0);
-      return fecha < minDate ? { fechaInvalida: true } : null;
+
+      const min = new Date(minDate);
+      min.setHours(0, 0, 0, 0);
+
+      return fecha < min ? { fechaInvalida: true } : null;
     };
   }
+
+
 
   handleAction(): void {
     if (!this.showStep) {

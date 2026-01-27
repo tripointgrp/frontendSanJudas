@@ -51,11 +51,11 @@
     >
     </ngx-datatable>
     <ng-template #fechaTpl let-row="row">
-      {{ row.fecha_inicio | date: 'dd/MM/yyyy' }}
+      {{ row.fecha_inicio | date:'dd/MM/yyyy':'UTC' }}
     </ng-template>
 
     <ng-template #fechaFinTpl let-row="row">
-      {{ row.fecha_fin | date: 'dd/MM/yyyy' }}
+      {{ row.fecha_fin | date:'dd/MM/yyyy':'UTC' }}
     </ng-template>
 
 

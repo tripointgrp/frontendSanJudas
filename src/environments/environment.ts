@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  // apiUrl: 'http://localhost:4000/'
-  apiUrl: 'https://backend-san-judas.vercel.app/'
+  apiUrl: 'http://localhost:4000/'
+  // apiUrl: 'https://backend-san-judas.vercel.app/'
 
 };
