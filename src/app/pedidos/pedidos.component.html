@@ -1,83 +1,105 @@
 <div class="pedidos-container">
-    <h1>PEDIDOS</h1>
+  <h1>PEDIDOS</h1>
 
-    <div class="buscador-agregar-container">
-        <div class="buscador">
-            <input type="text" placeholder="Buscar pedido..." [(ngModel)]="searchTerm" (input)="filterPedidos()" class="buscador-input" />
-            <span class="material-symbols-outlined buscador-icon">search</span>
-        </div>
-        <button class="submit-button" (click)="abrirModal()">Agregar pedido</button>
+  <div class="buscador-agregar-container">
+    <div class="buscador">
+      <input
+        type="text"
+        placeholder="Buscar pedido..."
+        [(ngModel)]="searchTerm"
+        (input)="filterPedidos()"
+        class="buscador-input"
+      />
+      <span class="material-symbols-outlined buscador-icon">search</span>
     </div>
-    <div class="m-2">
-      <div class="switch-container">
-        <span>Resumen por fechas</span>
-        <label class="switch">
-          <input type="checkbox" [(ngModel)]="isSwitchOn" (change)="toggleSwitch()" />
-          <span class="slider"></span>
-        </label>
-        <span class="switch-label">{{ isSwitchOn ? 'Activado' : 'Desactivado' }}</span>
-      </div>
-
-      <div *ngIf="isSwitchOn" class="fecha-descargar-container-compacto">
-        <div class="fecha-inputs-compacto">
-          <input type="date" [(ngModel)]="fechaInicio" class="fecha-input-compacto" />
-          <span class="guion">–</span>
-          <input type="date" [(ngModel)]="fechaFin" class="fecha-input-compacto" />
-          <button class="descargar-button-compacto" (click)="descargarProductos()">
-            Descargar
-          </button>
-        </div>
-      </div>
+    <button class="submit-button" (click)="abrirModal()">Agregar pedido</button>
+  </div>
+  <div class="m-2">
+    <div class="switch-container">
+      <span>Resumen por fechas</span>
+      <label class="switch">
+        <input
+          type="checkbox"
+          [(ngModel)]="isSwitchOn"
+          (change)="toggleSwitch()"
+        />
+        <span class="slider"></span>
+      </label>
+      <span class="switch-label">{{
+        isSwitchOn ? "Activado" : "Desactivado"
+      }}</span>
     </div>
 
+    <div *ngIf="isSwitchOn" class="fecha-descargar-container-compacto">
+      <div class="fecha-inputs-compacto">
+        <input
+          type="date"
+          [(ngModel)]="fechaInicio"
+          class="fecha-input-compacto"
+        />
+        <span class="guion">–</span>
+        <input
+          type="date"
+          [(ngModel)]="fechaFin"
+          class="fecha-input-compacto"
+        />
+        <button
+          class="descargar-button-compacto"
+          (click)="descargarProductos()"
+        >
+          Descargar
+        </button>
+      </div>
+    </div>
+  </div>
 
+  <ngx-datatable
+    [rows]="this.rows"
+    [columns]="[
+      { prop: 'id_escuela.nombre', name: 'Escuela', flexGrow: 2 },
+      { prop: 'total', name: 'Total Productos', flexGrow: 2 },
+      { name: 'Desde', cellTemplate: fechaTpl, flexGrow: 2 },
+      { name: 'Hasta', cellTemplate: fechaFinTpl, flexGrow: 2 },
+      { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
+      { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 },
+    ]"
+    class="bootstrap force-table"
+    columnMode="force"
+    [headerHeight]="60"
+    [footerHeight]="50"
+    [rowHeight]="50"
+    [scrollbarV]="false"
+  >
+  </ngx-datatable>
+  <ng-template #fechaTpl let-row="row">
+    {{ row.fecha_inicio | date: "dd/MM/yyyy" : "UTC" }}
+  </ng-template>
 
-    <ngx-datatable
-        [rows]="this.rows"
-        [columns]="[
-            { prop: 'id_escuela.nombre', name: 'Escuela', flexGrow: 2 },
-            { prop: 'total', name: 'Total Productos', flexGrow: 2 },
-            { name: 'Desde', cellTemplate: fechaTpl, flexGrow: 2 },
-            { name: 'Hasta', cellTemplate: fechaFinTpl, flexGrow: 2 },
-            { name: 'Detalle', cellTemplate: detalleTpl, flexGrow: 1 },
-            { name: 'Acciones', cellTemplate: actionTpl, flexGrow: 2 }
-        ]"
-        class="bootstrap force-table"
-        columnMode="force"
-        [headerHeight]="60"
-        [footerHeight]="50"
-        [rowHeight]="50"
-        [scrollbarV]="false"
+  <ng-template #fechaFinTpl let-row="row">
+    {{ row.fecha_fin | date: "dd/MM/yyyy" : "UTC" }}
+  </ng-template>
+
+  <!-- Template para el icono de detalle -->
+  <ng-template #detalleTpl let-row="row">
+    <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
+      visibility
+    </span>
+  </ng-template>
+
+  <!-- Template para los iconos de acción -->
+  <ng-template #actionTpl let-row="row">
+    <span
+      class="material-symbols-outlined span-edit"
+      (click)="abrirModal(row)"
     >
-    </ngx-datatable>
-    <ng-template #fechaTpl let-row="row">
-      {{ row.fecha_inicio | date:'dd/MM/yyyy':'UTC' }}
-    </ng-template>
+      edit
+    </span>
 
-    <ng-template #fechaFinTpl let-row="row">
-      {{ row.fecha_fin | date:'dd/MM/yyyy':'UTC' }}
-    </ng-template>
-
-
-    <!-- Template para el icono de detalle -->
-    <ng-template #detalleTpl let-row="row">
-        <span class="material-symbols-outlined span-view" (click)="verDetalle(row)">
-            visibility
-        </span>
-
-    </ng-template>
-
-    <!-- Template para los iconos de acción -->
-    <ng-template #actionTpl let-row="row">
-        <span class="material-symbols-outlined span-edit" (click)="abrirModal(row)" [class.disabled]="true" style="pointer-events: none; opacity: 0.5;">
-            edit
-        </span>
-
-        <span class="btn-delete material-symbols-outlined span-delete" (click)="eliminarPedido(row)">
-            delete
-        </span>
-
-
-
-    </ng-template>
+    <span
+      class="btn-delete material-symbols-outlined span-delete"
+      (click)="eliminarPedido(row)"
+    >
+      delete
+    </span>
+  </ng-template>
 </div>

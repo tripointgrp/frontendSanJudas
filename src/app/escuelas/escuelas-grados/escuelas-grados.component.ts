@@ -53,7 +53,6 @@ export class EscuelasGradosComponent {
   obtenerEscuelas(_id : any) {
     this.apiService.obtenerGradoEscuela(_id).subscribe({
       next: (data) => {
-        console.log('Escuelas obtenidas:', data.grados);
         this.rows = data.grados;
         this.filteredRows = [...data.grados];
         this.loading = false;
@@ -69,7 +68,6 @@ export class EscuelasGradosComponent {
   obtenerGrados() {
     this.apiService.obtenerGrados().subscribe({
       next: (data) => {
-        console.log('Grados obtenidos:', data);
         this.rowsGrados = data;
       },
       error: (error) => {
@@ -91,7 +89,6 @@ export class EscuelasGradosComponent {
 
   // 🔹 Abrir modal para agregar o editar escuela
   abrirModal(escuela: any = null): void {
-    console.log('Escuela:', escuela);
     this.form = this.fb.group({
       id_escuela: [this.escuela || '', Validators.required],
       id_grado: [escuela?.id_grado || 0, Validators.required],
@@ -137,7 +134,6 @@ export class EscuelasGradosComponent {
 
   // 🔹 Agregar una nueva escuela a la API
   agregarEscuela(nuevaEscuela: any) {
-    console.log('Nueva escuela:', nuevaEscuela);
     this.apiService.crearGradoEscuela(nuevaEscuela).subscribe({
       next: () => {
         this.toast.success('Grado agregado correctamente a la escuela', 'Éxito');
@@ -168,7 +164,6 @@ export class EscuelasGradosComponent {
 
   // 🔹 Eliminar una escuela de la API
   eliminarEscuela(escuela: any) {
-    console.log('Eliminar escuela:', escuela);
     if (
       confirm(`¿Seguro que deseas eliminar el grado "${escuela.nombre}"?`)
     ) {
@@ -187,7 +182,6 @@ export class EscuelasGradosComponent {
 
   goGrade(escuela: any) {
     const concatenatedData = `${this.idescuela},${escuela.id}`;
-    console.log('Concatenated Data:', concatenatedData);
     this.router.navigate([`/grados-presupuesto/${concatenatedData}`]);
   }
 }

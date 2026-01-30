@@ -159,8 +159,6 @@ export class ModaDialogPresupuestosComponent {
 
     const grupo = this.getProductosArray(diaIndex).at(productoIndex) as FormGroup;
     grupo.get('unidad_medida')?.setValue(unidad);
-
-    console.log('Unidad de medida actualizada:', unidad);
   }
 
 
@@ -226,12 +224,10 @@ export class ModaDialogPresupuestosComponent {
       }
 
       const idEscuela = this.form.get('escuela')?.value._id;
-      console.log('ID Escuela:', idEscuela);
 
       // Cargar grados y expandir modal
       this.cargarGrados(idEscuela).then(() => {
         this.expandirModal();
-        console.log('Grados cargados23:', this.grados);
         // Agregar productos por cada día seleccionado
         this.diasSeleccionables.controls.forEach((diaCtrl, index) => {
           if (diaCtrl.get('seleccionado')?.value) {
@@ -273,7 +269,6 @@ export class ModaDialogPresupuestosComponent {
           const producto = productoCtrl.get('producto')?.value;
           const unidad_medida = productoCtrl.get('unidad_medida')?.value;
           const precio_unitario = productoCtrl.get('precio_unitario')?.value;
-          console.log(precio_unitario)
           this.grados.forEach((grado, i) => {
             const cantidad = productoCtrl.get(`cantidad_${i}`)?.value || 0;
 
@@ -306,11 +301,8 @@ export class ModaDialogPresupuestosComponent {
       // total: totalCantidad,
       dias
     };
-
-    console.log('📦 Payload final para backend:', payload);
     this.servicio.crearPresupuestoSemanal(payload).subscribe({
       next: (response) => {
-        console.log('Pedido creado:', response);
         this.toastr.success('Presupuesto creado exitosamente.', 'Éxito');
         this.dialogRef.close(response); // Cerrar el modal y pasar el resultado
 
@@ -330,7 +322,6 @@ export class ModaDialogPresupuestosComponent {
     try {
       const grados = await this.data.buscarGradosPorEscuela(idEscuela);
       this.grados = grados;
-      console.log('Grados cargados:', grados);
     } catch (error) {
       console.error('Error al cargar grados:', error);
       this.toastr.error('No se pudieron cargar los grados', 'Error');
@@ -338,7 +329,6 @@ export class ModaDialogPresupuestosComponent {
   }
 
   expandirModal() {
-    console.log(this.form.value);
     if (!this.showStep) {
       this.dialogRef.updateSize('90vw', 'auto');
       this.showStep = true;
@@ -353,7 +343,6 @@ export class ModaDialogPresupuestosComponent {
   }
 
   agregarFila(productoData: any = null) {
-    console.log('Agregando fila con productoData:', productoData);
     const grupo: FormGroup = this.fb.group({
       producto: [productoData?.producto || '', Validators.required],
       unidad_medida: [productoData?.unidad_medida || '', Validators.required],
@@ -405,11 +394,9 @@ export class ModaDialogPresupuestosComponent {
 
 
   onEscuelaChange(event: any) {
-    console.log('Escuela seleccionada:', event._id);
     const escuelaId = event._id; // Obtener el ID de la escuela seleccionada
     this.servicio.obtenerGradoEscuela(escuelaId).subscribe({
       next: (data) => {
-        console.log('Grados obtenidos:', data);
         // this.data.grados = data;
         // this.productos.clear(); // Limpiar productos al cambiar escuela
         // this.agregarFila(); // Agregar fila inicial

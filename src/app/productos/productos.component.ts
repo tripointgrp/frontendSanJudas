@@ -12,6 +12,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../services/api.service';
 import { ToastrService } from 'ngx-toastr';
+import { LoaderService } from '../services/loader.service';
 // import pdfMake from 'pdfmake/build/pdfmake';
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 // (pdfMake as any).vfs = pdfFonts.vfs;
@@ -47,6 +48,8 @@ export class ProductosComponent {
     private fb: FormBuilder,
     private productosService: ApiService,
     private toastr: ToastrService,
+      private loader: LoaderService
+
   ) {}
 
   ngOnInit() {
@@ -73,17 +76,19 @@ export class ProductosComponent {
   }
 
   obtenerProductos() {
+    this.loader.show();
     this.productosService.obtenerProductos().subscribe({
       next: (data) => {
-        console.log('Productos:', data);
         this.rows = data;
         this.filteredRows = [...data];
         this.loading = false;
+        this.loader.hide();
       },
       error: (error) => {
         this.errorMessage = 'Error al obtener los productos';
         console.error('Error en la consulta:', error);
         this.loading = false;
+        this.loader.hide();
       },
     });
   }
@@ -91,7 +96,6 @@ export class ProductosComponent {
   obtenerCategoria() {
     this.productosService.obtenerCategorias().subscribe({
       next: (data) => {
-        console.log('Catgoria:', data);
         this.categorias = data;
         // this.filteredRows = [...data];
         this.loading = false;
@@ -107,7 +111,6 @@ export class ProductosComponent {
   obtenerUnidadMedida() {
     this.productosService.obtenerUnidadMedida().subscribe({
       next: (data) => {
-        console.log('Unidad de Medida:', data);
         this.unidadmedida = data;
         // this.filteredRows = [...data];
         this.loading = false;
@@ -121,8 +124,7 @@ export class ProductosComponent {
   }
 
   filterProducts() {
-    const term = this.searchTerm?.toLowerCase() ?? ''; // Asegurar que no sea undefined
-    console.log('Filtrar productos:', this.searchTerm);
+    const term = this.searchTerm?.toLowerCase() ?? '';
     this.filteredRows = this.rows.filter(
       (product) =>
         (product.nombre?.toLowerCase() ?? '').includes(term) ||
@@ -134,7 +136,6 @@ export class ProductosComponent {
   }
 
   editarProducto(row: any) {
-    console.log('Editar producto:', row);
     this.form = this.fb.group({
       nombre: [row.nombre, Validators.required],
       precio_variable: [row.precio_variable, [Validators.required]],
@@ -198,10 +199,8 @@ export class ProductosComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Datos editados:', result);
         this.actualizarProducto(row._id, result);
       } else {
-        console.log('Edición cancelada');
       }
     });
   }
@@ -228,10 +227,8 @@ export class ProductosComponent {
   }
 
   eliminarProducto(row: any) {
-    console.log('Eliminar producto:', row);
     this.productosService.eliminarProducto(row._id).subscribe({
       next: (data) => {
-        console.log('Producto eliminado:', data);
         this.toastr.success('Producto eliminado correctamente', 'Éxito');
         this.obtenerProductos();
       },
@@ -244,7 +241,6 @@ export class ProductosComponent {
   }
 
   insertarProducto(data: any) {
-    console.log('Insertar producto:', data);
     this.productosService
       .crearProducto({
         nombre: data.nombre,
@@ -255,7 +251,6 @@ export class ProductosComponent {
       })
       .subscribe({
         next: (data) => {
-          console.log('Producto insertado:', data);
           this.toastr.success('Producto insertado correctamente', 'Éxito');
           this.obtenerProductos();
         },
@@ -404,9 +399,7 @@ export class ProductosComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.insertarProducto(result);
-        console.log('Acción principal confirmada', result);
       } else {
-        console.log('Modal cerrado sin acción');
       }
     });
   }

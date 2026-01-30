@@ -20,12 +20,9 @@ export class SidebarComponent {
       // Aquí puedes agregar lógica adicional si es necesario
       const datos = this.authService.getUserData();
       this.tipoUsuario = datos ? datos.tipo_usuario : '';
-      console.log('Datos del usuario:', datos);
-      console.log('Tipo de usuario:', this.tipoUsuario);
     }
 
     handleClick(item: any) {
-      console.log('click', item);
       switch (item) {
         case 'home':
           this.router.navigate(['/home']);

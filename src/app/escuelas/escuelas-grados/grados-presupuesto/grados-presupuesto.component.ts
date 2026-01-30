@@ -51,19 +51,15 @@ export class GradosPresupuestoComponent {
     this.dataInfo = this.authService.getUserData()?.tipo_usuario
     const id = this.route.snapshot.paramMap.get('id');
     const ids = id ? id.split(',') : [];
-    this.idGradoEscuela = ids
-    console.log(this.idGradoEscuela); // Aquí puedes ver los IDs separados en un array
+    this.idGradoEscuela = ids // Aquí puedes ver los IDs separados en un array
     // Aquí puedes agregar la lógica que necesites al inicializar el componente
   }
 
   // 🔹 Obtener escuelas desde la API
   obtenerEscuelas(_id: any) {
-    console.log('ID Escuela:', _id);
     const id = _id ? _id.split(',') : [];
-    console.log('ID Escuela:', id[0]);
     this.apiService.getPresupuestosGrados(id[1]).subscribe({
       next: (data) => {
-        console.log('prespuestos obtenidas:', data);
         this.rows = data.presupuestos_por_grado
         this.filteredRows = [...data.presupuestos_por_grado
         ];
@@ -79,10 +75,8 @@ export class GradosPresupuestoComponent {
 
   obtenerGrados(_id: any) {
     const id = _id ? _id.split(',') : [];
-    console.log('ID Escuela:', id[0]);
     this.apiService.obtenerGradoEscuela(id[0]).subscribe({
       next: (data) => {
-        console.log('Grados obtenidos:', data.grados);
         this.rowsGrados = data.grados;
       },
       error: (error) => {
@@ -104,7 +98,6 @@ export class GradosPresupuestoComponent {
 
   // 🔹 Abrir modal para agregar o editar escuela
   abrirModal(escuela: any = null): void {
-    console.log('Escuela:', escuela);
     this.form = this.fb.group({
       id_presupuesto_escuela: [this.idGradoEscuela[1], Validators.required],
       id_escuela_grado: ['', Validators.required],
@@ -190,7 +183,6 @@ export class GradosPresupuestoComponent {
 
   // 🔹 Agregar una nueva escuela a la API
   agregarEscuela(nuevaEscuela: any) {
-    console.log('Nueva escuela:', nuevaEscuela);
     this.apiService.savePresupuestoGrado(nuevaEscuela).subscribe({
       next: () => {
         this.toast.success('Presupuesto agregado correctamente al grado', 'Éxito');
@@ -233,7 +225,6 @@ export class GradosPresupuestoComponent {
 
   // 🔹 Eliminar una escuela de la API
   eliminarEscuela(escuela: any) {
-    console.log('Eliminar escuela:', escuela);
     if (
       confirm(`¿Seguro que deseas eliminar el grado "${escuela.nombre}"?`)
     ) {
@@ -252,7 +243,6 @@ export class GradosPresupuestoComponent {
 
   goGrade(escuela: any) {
     const concatenatedData = `${this.idescuela},${escuela.id}`;
-    console.log('Concatenated Data:', concatenatedData);
     this.router.navigate([`/grados-presupuesto/${concatenatedData}`]);
   }
 

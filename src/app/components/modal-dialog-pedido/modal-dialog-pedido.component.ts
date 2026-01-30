@@ -59,42 +59,61 @@ export class ModalDialogPedidoComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
     private servicio: ApiService,
-    private authService: AuthService // Cambia esto por tu servicio de autenticación
+    private authService: AuthService, // Cambia esto por tu servicio de autenticación
   ) {
     this.dialogRef.addPanelClass('small');
     this.inicializarFormulario();
   }
 
   ngOnInit() {
-    console.log('Datos iniciales:', this.data?.pedidoEdit);
     this.form
       .get('fechaInicio')
       ?.valueChanges.subscribe(() => this.calcularDiasDisponibles());
     this.form
       .get('fechaFin')
       ?.valueChanges.subscribe(() => this.calcularDiasDisponibles());
+
+    if (this.data?.pedidoEdit) {
+      const editable = this.esPedidoEditable(
+        this.data.pedidoEdit.fecha_inicio,
+        30,
+      );
+
+      if (!editable) {
+        this.form.disable();
+        this.toastr.warning(
+          'Este pedido tiene más de 30 días y solo puede visualizarse.',
+          'Edición deshabilitada',
+        );
+      }
+    }
   }
 
   inicializarFormulario() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
+    const esEdicion = !!this.data?.pedidoEdit;
 
     this.form = this.fb.group(
       {
         escuela: [this.data.escuela || null, Validators.required],
         fechaInicio: [
           this.data.fechaInicio || null,
-          [Validators.required, this.fechaMinimaValidator(hoy)],
+          esEdicion
+            ? [Validators.required]
+            : [Validators.required, this.fechaMinimaValidator(hoy)],
         ],
         fechaFin: [
           this.data.fechaFin || null,
-          [Validators.required, this.fechaMinimaValidator(hoy)],
+          esEdicion
+            ? [Validators.required]
+            : [Validators.required, this.fechaMinimaValidator(hoy)],
         ],
         diasSeleccionables: this.fb.array([]),
       },
       {
         validators: this.fechasInicioFinValidator,
-      }
+      },
     );
 
     if (this.data.diasSeleccionables) {
@@ -114,15 +133,17 @@ export class ModalDialogPedidoComponent {
 
     if (this.data.pedidoEdit) {
       const pedido = this.data.pedidoEdit;
-      console.log('Pedido edit:', pedido);
 
       this.form.patchValue({
         escuela: pedido.id_escuela,
         fechaInicio: pedido.fecha_inicio.split('T')[0],
         fechaFin: pedido.fecha_fin.split('T')[0],
       });
+      this.form.get('fechaInicio')?.setErrors(null);
+      this.form.get('fechaFin')?.setErrors(null);
 
-      console.log(this.form.value);
+      this.form.get('fechaInicio')?.updateValueAndValidity();
+      this.form.get('fechaFin')?.updateValueAndValidity();
 
       this.calcularDiasDisponibles();
 
@@ -130,24 +151,54 @@ export class ModalDialogPedidoComponent {
         this.cargarGrados(pedido.id_escuela._id).then(() => {
           pedido.dias.forEach((diaEditado: any) => {
             const diaControl = this.diasSeleccionables.controls.find(
-              (d: AbstractControl) => d.get('fecha')?.value === diaEditado.fecha
+              (d: AbstractControl) =>
+                d.get('fecha')?.value === diaEditado.fecha,
             );
 
-            if (diaControl) {
+            if (diaControl && diaControl instanceof FormGroup) {
               diaControl.get('seleccionado')?.setValue(true);
 
-              const productosArray = diaControl.get('productos') as FormArray;
+              let productosArray = diaControl.get('productos') as FormArray;
+
+              if (!productosArray) {
+                productosArray = this.fb.array([]);
+                diaControl.addControl('productos', productosArray);
+              }
+
+              const productosMap = new Map<string, any>();
 
               diaEditado.detalles.forEach((detalle: any) => {
+                const productoId = detalle.id_producto._id;
+
+                if (!productosMap.has(productoId)) {
+                  productosMap.set(productoId, {
+                    producto: detalle.id_producto,
+                    unidad_medida: detalle.unidad_medida,
+                    cantidades: {},
+                  });
+                }
+
+                const producto = productosMap.get(productoId);
+
+                const gradoIndex = this.grados.findIndex(
+                  (g) => g.id === detalle.id_grado._id,
+                );
+
+                if (gradoIndex !== -1) {
+                  producto.cantidades[gradoIndex] = detalle.cantidad;
+                }
+              });
+
+              productosMap.forEach((data) => {
                 const grupo: { [key: string]: FormControl } = {
-                  producto: new FormControl(detalle.id_producto),
-                  unidad_medida: new FormControl(detalle.unidad_medida),
+                  producto: new FormControl(data.producto),
+                  unidad_medida: new FormControl(data.unidad_medida),
                 };
 
-                this.grados.forEach((grado, index) => {
-                  grupo[`cantidad_${index}`] = new FormControl(
-                    detalle.id_grado._id === grado.id ? detalle.cantidad : 0,
-                    Validators.required
+                this.grados.forEach((_, i) => {
+                  grupo[`cantidad_${i}`] = new FormControl(
+                    data.cantidades[i] || 0,
+                    Validators.required,
                   );
                 });
 
@@ -161,11 +212,7 @@ export class ModalDialogPedidoComponent {
         });
       }, 200);
     }
-
-
   }
-
-
 
   getProductosArray(diaIndex: number): FormArray {
     return this.diasSeleccionables.at(diaIndex).get('productos') as FormArray;
@@ -190,34 +237,38 @@ export class ModalDialogPedidoComponent {
 
     const grupoProducto = this.fb.group(grupo);
 
-    grupoProducto.get('producto')?.valueChanges.subscribe((productoSeleccionado: any) => {
-      const unidadObj = productoSeleccionado?.id_unidad_medida
-        ? {
-          id: productoSeleccionado.id_unidad_medida._id,
-          nombre: productoSeleccionado.id_unidad_medida.nombre,
-        }
-        : { id: null, nombre: '' };
+    grupoProducto
+      .get('producto')
+      ?.valueChanges.subscribe((productoSeleccionado: any) => {
+        const unidadObj = productoSeleccionado?.id_unidad_medida
+          ? {
+              id: productoSeleccionado.id_unidad_medida._id,
+              nombre: productoSeleccionado.id_unidad_medida.nombre,
+            }
+          : { id: null, nombre: '' };
 
-      grupoProducto.get('unidad_medida')?.setValue(unidadObj);
-    });
-
-
+        grupoProducto.get('unidad_medida')?.setValue(unidadObj);
+      });
 
     productosArray.push(grupoProducto);
   }
 
-  actualizarUnidad(nombreProducto: string, diaIndex: number, productoIndex: number): void {
-    const producto: { id_unidad_medida?: { nombre: string } } | undefined = this.data.productos.find((p: { nombre: string }) => p.nombre === nombreProducto);
+  actualizarUnidad(
+    nombreProducto: string,
+    diaIndex: number,
+    productoIndex: number,
+  ): void {
+    const producto: { id_unidad_medida?: { nombre: string } } | undefined =
+      this.data.productos.find(
+        (p: { nombre: string }) => p.nombre === nombreProducto,
+      );
     const unidad = producto?.id_unidad_medida?.nombre || '';
 
-    const grupo = this.getProductosArray(diaIndex).at(productoIndex) as FormGroup;
+    const grupo = this.getProductosArray(diaIndex).at(
+      productoIndex,
+    ) as FormGroup;
     grupo.get('unidad_medida')?.setValue(unidad);
-
-    console.log('Unidad de medida actualizada:', unidad);
   }
-
-
-
 
   eliminarProducto(diaIndex: number, productoIndex: number): void {
     const productosArray = this.getProductosArray(diaIndex);
@@ -236,8 +287,6 @@ export class ModalDialogPedidoComponent {
     producto.patchValue({ total }); // opcional si tienes un campo total
   }
 
-
-
   fechasInicioFinValidator(group: FormGroup) {
     const inicio = group.get('fechaInicio')?.value;
     const fin = group.get('fechaFin')?.value;
@@ -253,22 +302,16 @@ export class ModalDialogPedidoComponent {
 
     return null;
   }
+
   fechaMinimaValidator(minDate: Date) {
     return (control: FormControl) => {
-      if (!control.value) return null;
-
-      const [year, month, day] = control.value.split('-').map(Number);
-      const fecha = new Date(year, month - 1, day); // LOCAL real
+      const valor = control.value;
+      if (!valor) return null;
+      const fecha = new Date(valor);
       fecha.setHours(0, 0, 0, 0);
-
-      const min = new Date(minDate);
-      min.setHours(0, 0, 0, 0);
-
-      return fecha < min ? { fechaInvalida: true } : null;
+      return fecha < minDate ? { fechaInvalida: true } : null;
     };
   }
-
-
 
   handleAction(): void {
     if (!this.showStep) {
@@ -278,19 +321,20 @@ export class ModalDialogPedidoComponent {
         this.form.get('fechaFin')?.invalid ||
         this.form.hasError('fechasNoValidas')
       ) {
-        this.form.get('fechaInicio')?.markAsTouched();
-        this.form.get('fechaFin')?.markAsTouched();
+        this.form.markAllAsTouched();
         this.toastr.error('Corrige las fechas antes de continuar.', 'Error');
+
+        // 🔍 AQUÍ
+        this.logInvalidControls(this.form);
+
         return;
       }
 
       const idEscuela = this.form.get('escuela')?.value._id;
-      console.log('ID Escuela:', idEscuela);
 
       // Cargar grados y expandir modal
       this.cargarGrados(idEscuela).then(() => {
         this.expandirModal();
-        console.log('Grados cargados23:', this.grados);
         // Agregar productos por cada día seleccionado
         this.diasSeleccionables.controls.forEach((diaCtrl, index) => {
           if (diaCtrl.get('seleccionado')?.value) {
@@ -312,11 +356,30 @@ export class ModalDialogPedidoComponent {
     }
   }
 
+  private esPedidoEditable(
+    fechaInicio: string | Date,
+    limiteDias = 30,
+  ): boolean {
+    const inicio = new Date(fechaInicio);
+    inicio.setHours(0, 0, 0, 0);
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const diferenciaMs = hoy.getTime() - inicio.getTime();
+    const diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+
+    return diferenciaDias <= limiteDias;
+  }
 
   enviarFormulario(): void {
     if (this.form.invalid) {
       this.toastr.error('Formulario incompleto o con errores.', 'Error');
       this.form.markAllAsTouched();
+
+      // 🔍 AQUÍ
+      this.logInvalidControls(this.form);
+
       return;
     }
 
@@ -330,7 +393,12 @@ export class ModalDialogPedidoComponent {
 
         productosArray.controls.forEach((productoCtrl: AbstractControl) => {
           const producto = productoCtrl.get('producto')?.value;
-          const unidad_medida = productoCtrl.get('unidad_medida')?.value;
+
+          if (!producto || !producto._id) {
+            return;
+          }
+          const unidadMedidaId =
+            producto?.id_unidad_medida?._id || producto?.id_unidad_medida;
 
           this.grados.forEach((grado, i) => {
             const cantidad = productoCtrl.get(`cantidad_${i}`)?.value || 0;
@@ -340,7 +408,7 @@ export class ModalDialogPedidoComponent {
                 id_grado: grado.id,
                 id_producto: producto._id,
                 cantidad,
-                unidad_medida: unidad_medida.id
+                unidad_medida: unidadMedidaId,
               });
 
               totalCantidad += cantidad; // Sumamos a total general
@@ -350,7 +418,7 @@ export class ModalDialogPedidoComponent {
 
         dias.push({
           fecha: diaCtrl.get('fecha')?.value,
-          detalles
+          detalles,
         });
       }
     });
@@ -361,32 +429,89 @@ export class ModalDialogPedidoComponent {
       fecha_fin: this.form.get('fechaFin')?.value,
       id_usuario: this.authService.getUsuario(),
       total: totalCantidad,
-      dias
+      dias,
     };
 
-    console.log('📦 Payload final para backend:', payload);
-    this.servicio.crearPedido(payload).subscribe({
+    const esEdicion = !!this.data?.pedidoEdit;
+
+    if (esEdicion) {
+      const editable = this.esPedidoEditable(
+        this.data.pedidoEdit.fecha_inicio,
+        30, // ← aquí cambias el límite si quieres
+      );
+
+      if (!editable) {
+        this.toastr.error(
+          'No se puede editar un pedido con más de 30 días de antigüedad.',
+          'Edición bloqueada',
+        );
+        return; // ⛔ corta el envío
+      }
+    }
+
+    if (this.data?.pedidoEdit) {
+      const fechaInicioPedido = new Date(this.data.pedidoEdit.fecha_inicio);
+      const hoy = new Date();
+
+      const diferenciaMeses =
+        (hoy.getFullYear() - fechaInicioPedido.getFullYear()) * 12 +
+        (hoy.getMonth() - fechaInicioPedido.getMonth());
+
+      if (diferenciaMeses >= 1) {
+        this.form.disable();
+        this.toastr.warning(
+          'Este pedido tiene más de un mes y solo puede visualizarse.',
+          'Edición deshabilitada',
+        );
+      }
+    }
+
+    const request$ = esEdicion
+      ? this.servicio.actualizarPedidov2(this.data.pedidoEdit._id, payload)
+      : this.servicio.crearPedido(payload);
+
+    request$.subscribe({
       next: (response) => {
-        console.log('Pedido creado:', response);
-        this.toastr.success('Pedido creado exitosamente.', 'Éxito');
-        this.dialogRef.close(response); // Cerrar el modal y pasar el resultado
+        const mensaje = esEdicion
+          ? 'Pedido actualizado exitosamente.'
+          : 'Pedido creado exitosamente.';
+
+        this.toastr.success(mensaje, 'Éxito');
+        this.dialogRef.close(response);
       },
       error: (error) => {
-        console.error('Error al crear pedido:', error);
-        this.toastr.error('Error al crear pedido', 'Error');
+        console.error('Error al guardar pedido:', error);
+        this.toastr.error('Error al guardar pedido', 'Error');
       },
     });
   }
 
-
-
+  logInvalidControls(control: AbstractControl, path: string = ''): void {
+    if (control instanceof FormGroup) {
+      Object.keys(control.controls).forEach((key) => {
+        const child = control.get(key);
+        const currentPath = path ? `${path}.${key}` : key;
+        if (child) {
+          this.logInvalidControls(child, currentPath);
+        }
+      });
+    } else if (control instanceof FormArray) {
+      control.controls.forEach((child, index) => {
+        const currentPath = `${path}[${index}]`;
+        this.logInvalidControls(child, currentPath);
+      });
+    } else {
+      if (control.invalid) {
+        console.error('❌ CAMPO INVÁLIDO:', path, control.errors);
+      }
+    }
+  }
 
   // en un método async del modal
   async cargarGrados(idEscuela: string) {
     try {
       const grados = await this.data.buscarGradosPorEscuela(idEscuela);
       this.grados = grados;
-      console.log('Grados cargados:', grados);
     } catch (error) {
       console.error('Error al cargar grados:', error);
       this.toastr.error('No se pudieron cargar los grados', 'Error');
@@ -394,7 +519,6 @@ export class ModalDialogPedidoComponent {
   }
 
   expandirModal() {
-    console.log(this.form.value);
     if (!this.showStep) {
       this.dialogRef.updateSize('90vw', 'auto');
       this.showStep = true;
@@ -409,7 +533,6 @@ export class ModalDialogPedidoComponent {
   }
 
   agregarFila(productoData: any = null) {
-    console.log('Agregando fila con productoData:', productoData);
     const grupo: FormGroup = this.fb.group({
       producto: [productoData?.producto || '', Validators.required],
       unidad_medida: [productoData?.unidad_medida || '', Validators.required],
@@ -422,8 +545,8 @@ export class ModalDialogPedidoComponent {
           `cantidad_${index}`,
           new FormControl(
             productoData ? productoData[`cantidad_${index}`] : 0,
-            Validators.required
-          )
+            Validators.required,
+          ),
         );
       });
     } else {
@@ -446,7 +569,7 @@ export class ModalDialogPedidoComponent {
 
     this.totalGeneral = this.productos.controls.reduce(
       (sum, prod: any) => sum + (prod.get('total')?.value || 0),
-      0
+      0,
     );
   }
 
@@ -459,13 +582,10 @@ export class ModalDialogPedidoComponent {
     this.dialogRef.close(null);
   }
 
-
   onEscuelaChange(event: any) {
-    console.log('Escuela seleccionada:', event._id);
     const escuelaId = event._id; // Obtener el ID de la escuela seleccionada
     this.servicio.obtenerGradoEscuela(escuelaId).subscribe({
       next: (data) => {
-        console.log('Grados obtenidos:', data);
         // this.data.grados = data;
         // this.productos.clear(); // Limpiar productos al cambiar escuela
         // this.agregarFila(); // Agregar fila inicial
@@ -490,9 +610,6 @@ export class ModalDialogPedidoComponent {
     return this.form.get('diasSeleccionables') as FormArray;
   }
 
-
-
-
   calcularDiasDisponibles(): void {
     const formArray = this.form.get('diasSeleccionables') as FormArray;
     formArray.clear();
@@ -504,7 +621,6 @@ export class ModalDialogPedidoComponent {
 
     const fechaInicio = this.parseFechaLocal(inicio);
     const fechaFin = this.parseFechaLocal(fin);
-
 
     if (fechaInicio >= fechaFin) return;
 
@@ -522,7 +638,7 @@ export class ModalDialogPedidoComponent {
           nombre: [this.capitalize(nombreDia)],
           fecha: [fechaTexto],
           seleccionado: [false],
-        })
+        }),
       );
 
       actual.setDate(actual.getDate() + 1);
@@ -547,8 +663,4 @@ export class ModalDialogPedidoComponent {
     producto.total = suma; // Actualiza el total en el array por si lo necesitás
     return suma;
   }
-
-
-
-
 }

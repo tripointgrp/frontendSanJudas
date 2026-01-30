@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PresupuestosModalComponent } from './presupuestos-modal/presupuestos-modal.component';
 import { ModaDialogPresupuestosComponent } from '../components/moda-dialog-presupuestos/moda-dialog-presupuestos.component';
+import { LoaderService } from '../services/loader.service';
 // import pdfMake from 'pdfmake/build/pdfmake';
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 
@@ -38,6 +39,7 @@ export class PresupuestosComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private toastr: ToastrService,
+    private loader: LoaderService,
   ) {}
 
   ngOnInit() {
@@ -65,14 +67,16 @@ export class PresupuestosComponent implements OnInit {
 
   // 🔹 Obtener pedidos desde la API
   obtenerPedidos() {
+    this.loader.show();
     this.apiService.obtenerPresupuestosSemanal().subscribe({
       next: (data) => {
-        console.log('Pedidos obtenidos:', data);
         this.rows = data;
         this.filteredRows = [...data];
         this.loading = false;
+        this.loader.hide();
       },
       error: (error) => {
+        this.loader.hide();
         this.errorMessage = 'Error al obtener los pedidos';
         console.error('Error en la consulta:', error);
         this.loading = false;
@@ -83,9 +87,7 @@ export class PresupuestosComponent implements OnInit {
   obtenerProductos() {
     this.apiService.obtenerProductos().subscribe({
       next: (data) => {
-        console.log('Productos obtenidos:', data);
         this.rowsProductos = data;
-        console.log(this.rowsProductos);
       },
       error: (error) => {
         this.errorMessage = 'Error al obtener los pedidos';
@@ -96,8 +98,6 @@ export class PresupuestosComponent implements OnInit {
   }
 
   getGrados(idEscuela: string = ''): Promise<{ id: any; nombre: any }[]> {
-    console.log('ID Escuela:', idEscuela);
-
     return new Promise((resolve, reject) => {
       this.apiService.obtenerGradoEscuela(idEscuela).subscribe({
         next: (data) => {
@@ -132,7 +132,6 @@ export class PresupuestosComponent implements OnInit {
 
   // 🔹 Ver detalles de un pedido
   verDetalle(pedido: any): void {
-    console.log('Detalles del pedido:', pedido);
     this.dialog.open(PresupuestosModalComponent, {
       width: '90vw', // ✅ 90% del ancho de la ventana
       maxWidth: '95vw', // 🔹 Para asegurarte de que no lo restrinja el maxWidth default
@@ -144,7 +143,6 @@ export class PresupuestosComponent implements OnInit {
   obtenerEscuelas() {
     this.apiService.obtenerEscuelas().subscribe({
       next: (data) => {
-        console.log('Escuelas obtenidas:', data);
         this.rowsEscuelas = data;
       },
       error: (error) => {
@@ -155,7 +153,6 @@ export class PresupuestosComponent implements OnInit {
   }
 
   abrirModal(pedido: any = null): void {
-    console.log('antes de entrar', this.rowsProductos);
     const dialogRef = this.dialog.open(ModaDialogPresupuestosComponent, {
       maxWidth: 'none', // 🔹 Permite que el diálogo tome el tamaño definido en width
       width: '80vh', // 🔹 El 90% del ancho de la ventana
@@ -179,7 +176,6 @@ export class PresupuestosComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Pedido guardado:', result);
         if (pedido) {
           // Actualizar pedido existente
           this.obtenerPedidos();

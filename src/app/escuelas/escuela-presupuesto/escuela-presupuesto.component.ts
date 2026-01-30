@@ -54,7 +54,6 @@ title = 'Presupuesto por mes';
   obtenerEscuelas(_id : any) {
     this.apiService.getPresupuestosEscuelas(_id).subscribe({
       next: (data) => {
-        console.log('Escuelas obtenidas:', data.presupuestos);
         this.rows = data.presupuestos;
         this.filteredRows = [...data.presupuestos];
         this.loading = false;
@@ -70,7 +69,6 @@ title = 'Presupuesto por mes';
   obtenerGrados() {
     this.apiService.obtenerGrados().subscribe({
       next: (data) => {
-        console.log('Grados obtenidos:', data);
         this.rowsGrados = data;
       },
       error: (error) => {
@@ -92,7 +90,6 @@ title = 'Presupuesto por mes';
 
   // 🔹 Abrir modal para agregar o editar escuela
   abrirModal(escuela: any = null): void {
-    console.log('Escuela:', escuela);
     this.form = this.fb.group({
       id_escuela: [this.escuela || '', Validators.required],
       mes: [escuela?.mes , Validators.required],
@@ -167,7 +164,6 @@ title = 'Presupuesto por mes';
 
   // 🔹 Agregar una nueva escuela a la API
   agregarEscuela(nuevaEscuela: any) {
-    console.log('Nueva escuela:', nuevaEscuela);
     this.apiService.savePresupuestoEscuela(nuevaEscuela).subscribe({
       next: () => {
         this.toast.success('Presupuesto agregado correctamente a la escuela', 'Éxito');
@@ -198,7 +194,6 @@ title = 'Presupuesto por mes';
 
   // 🔹 Eliminar una escuela de la API
   eliminarEscuela(escuela: any) {
-    console.log('Eliminar escuela:', escuela);
     if (
       confirm(`¿Seguro que deseas eliminar el grado "${escuela.nombre}"?`)
     ) {
@@ -216,9 +211,7 @@ title = 'Presupuesto por mes';
   }
 
   goGrade(escuela: any) {
-    console.log('Ir a grados de la escuela:', escuela);
     const concatenatedData = `${this.idescuela},${escuela._id}`;
-    console.log('Concatenated Data:', concatenatedData);
     this.router.navigate([`/grados-presupuesto/${concatenatedData}`]);
   }
 }

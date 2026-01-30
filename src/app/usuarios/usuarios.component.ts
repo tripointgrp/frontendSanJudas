@@ -6,6 +6,7 @@ import { ApiService } from '../services/api.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.component';
+import { LoaderService } from '../services/loader.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -23,7 +24,7 @@ export class UsuariosComponent implements OnInit {
   errorMessage = '';
   form!: FormGroup;
 
-  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder) {}
+  constructor(private apiService: ApiService, private dialog: MatDialog, private fb: FormBuilder,  private loader: LoaderService) {}
 
   ngOnInit() {
     this.obtenerUsuarios();
@@ -31,17 +32,19 @@ export class UsuariosComponent implements OnInit {
 
   // 🔹 Obtener usuarios desde la API
   obtenerUsuarios() {
+    this.loader.show();
     this.apiService.obtenerUsuarios().subscribe({
       next: (data) => {
-        console.log('Usuarios obtenidos:', data);
         this.rows = data;
         this.filteredRows = [...data];
         this.loading = false;
+        this.loader.hide();
       },
       error: (error) => {
         this.errorMessage = 'Error al obtener los usuarios';
         console.error('Error en la consulta:', error);
         this.loading = false;
+        this.loader.hide();
       }
     });
   }

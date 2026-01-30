@@ -9,6 +9,7 @@ import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.co
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { LoaderService } from '../services/loader.service';
 
 @Component({
   selector: 'app-escuelas',
@@ -26,7 +27,7 @@ export class EscuelasComponent implements OnInit {
   errorMessage = '';
   form!: FormGroup;
   dataInfo: any;
-  constructor(private apiService: ApiService,private authService:AuthService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService, private router : Router  ) {}
+  constructor(  private loader: LoaderService,private apiService: ApiService,private authService:AuthService, private dialog: MatDialog, private fb: FormBuilder, private toast : ToastrService, private router : Router  ) {}
 
   ngOnInit() {
     this.obtenerEscuelas();
@@ -35,17 +36,19 @@ export class EscuelasComponent implements OnInit {
 
   // 🔹 Obtener escuelas desde la API
   obtenerEscuelas() {
+    this.loader.show();
     this.apiService.obtenerEscuelas().subscribe({
       next: (data) => {
-        console.log('Escuelas obtenidas:', data);
         this.rows = data;
         this.filteredRows = [...data];
         this.loading = false;
+        this.loader.hide();
       },
       error: (error) => {
         this.errorMessage = 'Error al obtener las escuelas';
         console.error('Error en la consulta:', error);
         this.loading = false;
+        this.loader.hide();
       }
     });
   }
@@ -140,12 +143,10 @@ export class EscuelasComponent implements OnInit {
   }
 
   goGrade(escuela: any) {
-    console.log('Ir a grados de la escuela:', escuela);
     this.router.navigate([`/escuelas-grados/${escuela._id}`]);
   }
 
   goPresupuesto(escuela: any) {
-    console.log('Ir a presupuesto de la escuela:', escuela);
     this.router.navigate([`/escuelas-presupuesto/${escuela._id}`]);
   }
 }

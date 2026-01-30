@@ -9,6 +9,7 @@ import { ModalDialogComponent } from '../components/modal-dialog/modal-dialog.co
 import { ModalDialogPedidoComponent } from '../components/modal-dialog-pedido/modal-dialog-pedido.component';
 import { ToastrService } from 'ngx-toastr';
 import { PedidosModalComponent } from './pedidos-modal/pedidos-modal.component';
+import { LoaderService } from '../services/loader.service';
 
 // // ✅ Importar pdfMake y fuentes de forma compatible con Vite
 // import pdfMake from 'pdfmake/build/pdfmake';
@@ -16,9 +17,6 @@ import { PedidosModalComponent } from './pedidos-modal/pedidos-modal.component';
 
 // // ✅ Asignar fuentes virtuales correctamente
 // (pdfMake as any).vfs = pdfFonts.vfs;
-
-
-
 
 @Component({
   selector: 'app-pedidos',
@@ -40,15 +38,16 @@ export class PedidosComponent implements OnInit {
   form!: FormGroup;
   fechaInicio: Date | null = null;
   fechaFin: Date | null = null;
-  isSwitchOn = false
+  isSwitchOn = false;
   private pdfMake: any | null = null;
 
   constructor(
     private apiService: ApiService,
     private dialog: MatDialog,
     private fb: FormBuilder,
-    private toastr: ToastrService
-  ) { }
+    private toastr: ToastrService,
+    private loader: LoaderService
+  ) {}
 
   ngOnInit() {
     this.obtenerPedidos();
@@ -60,7 +59,7 @@ export class PedidosComponent implements OnInit {
     const opciones: Intl.DateTimeFormatOptions = {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     };
 
     return fecha.toLocaleDateString('es-ES', opciones);
@@ -85,102 +84,106 @@ export class PedidosComponent implements OnInit {
   }
 
   async descargarProductos() {
-  const pdfMake = await this.loadPdfMake();
-  if (!pdfMake) return;
+    const pdfMake = await this.loadPdfMake();
+    if (!pdfMake) return;
 
     if (!this.fechaInicio || !this.fechaFin) {
       this.toastr.error('Por favor selecciona fechas válidas', 'Error');
       return;
     }
 
-    const fechaInicioStr = new Date(this.fechaInicio).toISOString().slice(0, 10);
+    const fechaInicioStr = new Date(this.fechaInicio)
+      .toISOString()
+      .slice(0, 10);
     const fechaFinStr = new Date(this.fechaFin).toISOString().slice(0, 10);
 
     this.apiService.getPedidosFechas(fechaInicioStr, fechaFinStr).subscribe({
       next: (productos) => {
         if (!productos || productos.length === 0) {
-          this.toastr.warning('No se encontraron productos en ese rango de fechas.', 'Sin datos');
+          this.toastr.warning(
+            'No se encontraron productos en ese rango de fechas.',
+            'Sin datos',
+          );
           return;
         }
 
         // Construir tabla
-    const tablaBody = [
-    ['Producto', 'Unidad', 'Cantidad'],
-    ...productos.map((p) => [
-      p.producto,
-      p.unidad,
-      Number.isInteger(p.cantidad_total)
-        ? p.cantidad_total.toString()
-        : p.cantidad_total.toFixed(2)
-    ])
-  ];
+        const tablaBody = [
+          ['Producto', 'Unidad', 'Cantidad'],
+          ...productos.map((p) => [
+            p.producto,
+            p.unidad,
+            Number.isInteger(p.cantidad_total)
+              ? p.cantidad_total.toString()
+              : p.cantidad_total.toFixed(2),
+          ]),
+        ];
 
-
-
-      // Definir PDF
-      const docDefinition: any = {
-        content: [
-          { text: 'Lista de Ingredientes', style: 'header', alignment: 'center' },
-          {
-            text: `De: ${this.formatFecha(fechaInicioStr)} - ${this.formatFecha(fechaFinStr)}`,
-
-
-            alignment: 'center',
-            margin: [0, 0, 0, 10]
-          },
-          {
-            table: {
-              headerRows: 1,
-              widths: ['*', 'auto', 'auto'],
-              body: tablaBody
+        // Definir PDF
+        const docDefinition: any = {
+          content: [
+            {
+              text: 'Lista de Ingredientes',
+              style: 'header',
+              alignment: 'center',
             },
-            layout: 'lightHorizontalLines'
-          }
-        ],
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            color: '#2E7D32',
-            margin: [0, 0, 0, 10]
-          }
-        }
-      };
+            {
+              text: `De: ${this.formatFecha(fechaInicioStr)} - ${this.formatFecha(fechaFinStr)}`,
 
-      pdfMake.createPdf(docDefinition).download(`Lista_Ingredientes_${fechaInicioStr}_a_${fechaFinStr}.pdf`);
-    },
-    error: () => {
-      this.toastr.error('Error al obtener los productos', 'Error');
-    }
-  });
-}
+              alignment: 'center',
+              margin: [0, 0, 0, 10],
+            },
+            {
+              table: {
+                headerRows: 1,
+                widths: ['*', 'auto', 'auto'],
+                body: tablaBody,
+              },
+              layout: 'lightHorizontalLines',
+            },
+          ],
+          styles: {
+            header: {
+              fontSize: 18,
+              bold: true,
+              color: '#2E7D32',
+              margin: [0, 0, 0, 10],
+            },
+          },
+        };
 
-formatFecha (fecha: string) {
-  const [year, month, day] = fecha.split('-');
-  return `${day}/${month}/${year}`;
-};
+        pdfMake
+          .createPdf(docDefinition)
+          .download(
+            `Lista_Ingredientes_${fechaInicioStr}_a_${fechaFinStr}.pdf`,
+          );
+      },
+      error: () => {
+        this.toastr.error('Error al obtener los productos', 'Error');
+      },
+    });
+  }
 
-
-
-
-
+  formatFecha(fecha: string) {
+    const [year, month, day] = fecha.split('-');
+    return `${day}/${month}/${year}`;
+  }
 
   toggleSwitch() {
-    console.log('Switch activado/desactivado:', this.isSwitchOn);
-    // this.isSwitchOn = !this.isSwitchOn; // Cambia el estado del switch
-    console.log('Estado del switch:', this.isSwitchOn);
   }
 
   // 🔹 Obtener pedidos desde la API
   obtenerPedidos() {
+    this.loader.show();
     this.apiService.obtenerPedidoCompleto().subscribe({
       next: (data) => {
-        console.log('Pedidos obtenidos:', data);
         this.rows = data;
         this.filteredRows = [...data];
         this.loading = false;
+          this.loader.hide();
       },
       error: (error) => {
+        this.loader.hide();
         this.errorMessage = 'Error al obtener los pedidos';
         console.error('Error en la consulta:', error);
         this.loading = false;
@@ -191,9 +194,7 @@ formatFecha (fecha: string) {
   obtenerProductos() {
     this.apiService.obtenerProductos().subscribe({
       next: (data) => {
-        console.log('Productos obtenidos:', data);
         this.rowsProductos = data;
-        console.log(this.rowsProductos);
       },
       error: (error) => {
         this.errorMessage = 'Error al obtener los pedidos';
@@ -204,16 +205,15 @@ formatFecha (fecha: string) {
   }
 
   getGrados(idEscuela: string = ''): Promise<{ id: any; nombre: any }[]> {
-    console.log('ID Escuela:', idEscuela);
 
     return new Promise((resolve, reject) => {
       this.apiService.obtenerGradoEscuela(idEscuela).subscribe({
         next: (data) => {
           const grados = Array.isArray(data.grados)
             ? data.grados.map((grado: any) => ({
-              id: grado.id,
-              nombre: grado.nombre,
-            }))
+                id: grado.id,
+                nombre: grado.nombre,
+              }))
             : [];
 
           resolve(grados); // ✅ devolvemos los grados ya cargados
@@ -227,7 +227,6 @@ formatFecha (fecha: string) {
     });
   }
 
-
   // 🔹 Filtrar pedidos en la tabla
   filterPedidos() {
     const term = this.searchTerm?.toLowerCase() ?? '';
@@ -235,28 +234,23 @@ formatFecha (fecha: string) {
       (pedido) =>
         (pedido.escuela?.toLowerCase() ?? '').includes(term) ||
         (pedido.grado?.toLowerCase() ?? '').includes(term) ||
-        (pedido.fecha_pedido ?? '').includes(term)
+        (pedido.fecha_pedido ?? '').includes(term),
     );
   }
 
   // 🔹 Ver detalles de un pedido
   verDetalle(pedido: any): void {
-    console.log('Detalles del pedido:', pedido);
     this.dialog.open(PedidosModalComponent, {
       width: '90vw', // ✅ 90% del ancho de la ventana
       maxWidth: '95vw', // 🔹 Para asegurarte de que no lo restrinja el maxWidth default
       panelClass: 'wide-modal', // Opcional: aplicar estilos adicionales
       data: pedido,
     });
-
-
   }
-
 
   obtenerEscuelas() {
     this.apiService.obtenerEscuelas().subscribe({
       next: (data) => {
-        console.log('Escuelas obtenidas:', data);
         this.rowsEscuelas = data;
       },
       error: (error) => {
@@ -267,7 +261,6 @@ formatFecha (fecha: string) {
   }
 
   abrirModal(pedido: any = null): void {
-    console.log('antes de entrar', pedido)
     const dialogRef = this.dialog.open(ModalDialogPedidoComponent, {
       maxWidth: 'none', // 🔹 Permite que el diálogo tome el tamaño definido en width
       width: '80vh', // 🔹 El 90% del ancho de la ventana
@@ -284,14 +277,14 @@ formatFecha (fecha: string) {
         actionButtonText: pedido ? 'Actualizar' : 'Guardar',
         escuelas: this.rowsEscuelas,
         productos: this.rowsProductos,
-        buscarGradosPorEscuela: (idEscuela: string) => this.getGrados(idEscuela),
+        buscarGradosPorEscuela: (idEscuela: string) =>
+          this.getGrados(idEscuela),
         grados: ['Grado 1', 'Grado 2', 'Grado 3'], // Simulación de grados
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Pedido guardado:', result);
         if (result) {
           // Actualizar pedido existente
           this.obtenerPedidos();
@@ -328,7 +321,7 @@ formatFecha (fecha: string) {
   eliminarPedido(pedido: any) {
     if (
       confirm(
-        `¿Seguro que deseas eliminar el pedido de la escuela "${pedido.escuela}"?`
+        `¿Seguro que deseas eliminar el pedido de la escuela "${pedido.escuela}"?`,
       )
     ) {
       this.apiService.eliminarPedido(pedido._id).subscribe({
@@ -342,10 +335,9 @@ formatFecha (fecha: string) {
     }
   }
   // 🔹 Función para generar PDF de un pedido
-  async generarPDF(pedido: any): Promise<void> {
-    console.log('Se disparó generarPDF:', pedido); // 🔍 Verifica si esto aparece
+  async generarPDF(pedido: any): Promise<void> { // 🔍 Verifica si esto aparece
     const pdfMake = await this.loadPdfMake();
-      if (!pdfMake) return;
+    if (!pdfMake) return;
 
     if (!pedido || !Array.isArray(pedido.dias)) {
       console.error('Pedido inválido o sin días');
@@ -365,44 +357,45 @@ formatFecha (fecha: string) {
             `Correo: ${pedido.id_usuario?.correo}`,
             `Fecha de Inicio: ${new Date(pedido.fecha_inicio).toLocaleDateString()}`,
             `Fecha de Finalización: ${new Date(pedido.fecha_fin).toLocaleDateString()}`,
-            `Total de Productos: ${pedido.total}`
-          ]
+            `Total de Productos: ${pedido.total}`,
+          ],
         },
         { text: 'Días del Pedido:', style: 'subheader' },
-        ...pedido.dias.map((dia: any) => [
-          { text: `Fecha: ${dia.fecha}`, style: 'fechaDia' },
-          {
-            table: {
-              headerRows: 1,
-              widths: ['*', '*', 'auto', 'auto'],
-              body: [
-                ['Producto', 'Grado', 'Cantidad', 'Unidad'],
-                ...dia.detalles.map((detalle: any) => [
-                  detalle.id_producto?.nombre || 'N/A',
-                  detalle.id_grado?.id_grado?.nombre || 'N/A',
-                  detalle.cantidad,
-                  detalle.unidad_medida?.nombre || 'N/A'
-                ])
-              ]
+        ...pedido.dias
+          .map((dia: any) => [
+            { text: `Fecha: ${dia.fecha}`, style: 'fechaDia' },
+            {
+              table: {
+                headerRows: 1,
+                widths: ['*', '*', 'auto', 'auto'],
+                body: [
+                  ['Producto', 'Grado', 'Cantidad', 'Unidad'],
+                  ...dia.detalles.map((detalle: any) => [
+                    detalle.id_producto?.nombre || 'N/A',
+                    detalle.id_grado?.id_grado?.nombre || 'N/A',
+                    detalle.cantidad,
+                    detalle.unidad_medida?.nombre || 'N/A',
+                  ]),
+                ],
+              },
+              layout: 'lightHorizontalLines',
+              margin: [0, 0, 0, 10],
             },
-            layout: 'lightHorizontalLines',
-            margin: [0, 0, 0, 10]
-          }
-        ]).flat()
+          ])
+          .flat(),
       ],
       styles: {
         header: { fontSize: 18, bold: true, color: '#1A20B6' },
-        subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 0], color: '#1D24CA' },
-        fechaDia: { bold: true, color: '#D91E36', margin: [0, 10, 0, 5] }
-      }
-
+        subheader: {
+          fontSize: 16,
+          bold: true,
+          margin: [0, 10, 0, 0],
+          color: '#1D24CA',
+        },
+        fechaDia: { bold: true, color: '#D91E36', margin: [0, 10, 0, 5] },
+      },
     };
 
-   pdfMake.createPdf(docDefinition as any).download('Lista_Compras.pdf');
-
-
-
+    pdfMake.createPdf(docDefinition as any).download('Lista_Compras.pdf');
   }
-
-
 }
